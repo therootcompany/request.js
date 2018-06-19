@@ -30,6 +30,7 @@ function mergeOrDelete(defaults, updates) {
 }
 
 function toJSONifier(keys) {
+
   return function () {
     var obj = {};
     var me = this;
@@ -50,7 +51,7 @@ function setDefaults(defs) {
   defs = defs || {};
 
   function urequestHelper(opts, cb) {
-    debug("[urequest] processed options:");
+    debug("\n[urequest] processed options:");
     debug(opts);
 
     function onResponse(resp) {
@@ -72,10 +73,10 @@ function setDefaults(defs) {
       resp.request.headers = opts.headers;
       resp.request.toJSON = toJSONifier([ 'uri', 'method', 'headers' ]);
 
-      if (resp.headers.location && opts.followRedirect) {
+      if (followRedirect && resp.headers.location && -1 !== [ 301, 302 ].indexOf(resp.statusCode)) {
         debug('Following redirect: ' + resp.headers.location);
-        if (opts.followAllRedirects || -1 !== [ 301, 302 ].indexOf(resp.statusCode)) {
-          followRedirect = true;
+        if ('GET' !== opts.method && !opts.followAllRedirects) {
+          followRedirect = false;
         }
         if (opts._redirectCount >= opts.maxRedirects) {
           followRedirect = false;
@@ -85,17 +86,17 @@ function setDefaults(defs) {
             followRedirect = false;
           }
         }
-        if (!opts.followOriginalHttpMethod) {
-          opts.method = 'GET';
-          opts.body = null;
-        }
         if (followRedirect) {
+          if (!opts.followOriginalHttpMethod) {
+            opts.method = 'GET';
+            opts.body = null;
+          }
+          if (opts.removeRefererHeader && opts.headers) {
+            delete opts.headers.referer;
+          }
           opts.url = resp.headers.location;
           opts.uri = url.parse(opts.url);
           return urequestHelper(opts, cb);
-        }
-        if (opts.removeRefererHeader && opts.headers) {
-          delete opts.headers.referer;
         }
       }
       if (null === opts.encoding) {
@@ -130,25 +131,51 @@ function setDefaults(defs) {
             // ignore
           }
         }
+
+        debug("\n[urequest] resp.toJSON():");
+        debug(resp.toJSON());
         cb(null, resp, resp.body);
       });
     }
 
     var req;
     var finalOpts = {};
+    var _body;
+
+    if (opts.body) {
+      if (true === opts.json) {
+        _body = JSON.stringify(opts.body);
+      } else {
+        _body = opts.body;
+      }
+    } else if (opts.json && true !== opts.json) {
+      _body = JSON.stringify(opts.json);
+    }
+    if ('string' === typeof _body) {
+      _body = Buffer.from(_body);
+    }
 
     Object.keys(opts.uri).forEach(function (key) {
       finalOpts[key] = opts.uri[key];
     });
     finalOpts.method = opts.method;
     finalOpts.headers = opts.headers;
+    if (_body) {
+      // Most APIs expect (or require) Content-Length except in the case of multipart uploads
+      // chunked is generally only well-supported downstream
+      //finalOpts.headers['Content-Length'] = _body.byteLength || _body.length;
+    }
 
     // TODO support unix sockets
     if ('https:' === finalOpts.protocol) {
       // https://nodejs.org/api/https.html#https_https_request_options_callback
+      debug("\n[urequest] https.request(opts):");
+      debug(finalOpts);
       req = https.request(finalOpts, onResponse);
     } else if ('http:' === finalOpts.protocol) {
       // https://nodejs.org/api/http.html#http_http_request_options_callback
+      debug("\n[urequest] http.request(opts):");
+      debug(finalOpts);
       req = http.request(finalOpts, onResponse);
     } else {
       throw new Error("unknown protocol: '" + opts.uri.protocol + "'");
@@ -158,20 +185,20 @@ function setDefaults(defs) {
       cb(e);
     });
 
-    if (opts.body) {
-      if (true === opts.json) {
-        req.write(JSON.stringify(opts.json));
-      } else {
-        req.write(opts.body);
-      }
-    } else if (opts.json && true !== opts.json) {
-      req.write(JSON.stringify(opts.json));
+    if (_body) {
+      debug("\n[urequest] body");
+      debug(_body);
+      // used for chunked encoding
+      //req.write(_body);
+      // used for known content-length
+      req.end(_body);
+    } else {
+      req.end();
     }
-    req.end();
   }
 
   function urequest(opts, cb) {
-    debug("[urequest] received options:");
+    debug("\n[urequest] received options:");
     debug(opts);
     var reqOpts = {};
     // request.js behavior:
@@ -201,7 +228,7 @@ function setDefaults(defs) {
         //reqOpts.uri = url.parse(reqOpts.url);
       }
     }
-    reqOpts.method = opts.method || 'GET';
+    reqOpts.method = (opts.method || 'GET').toUpperCase();
     reqOpts.headers = opts.headers || {};
     if ((true === reqOpts.json && reqOpts.body) || reqOpts.json) {
       reqOpts.headers['Content-Type'] = 'application/json';
