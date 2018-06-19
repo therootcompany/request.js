@@ -1,6 +1,6 @@
 'use strict';
 
-//var request = require('urequest');
+//var request = require('request-lite');
 var request = require('../');
 
 // will redirect to https://www.github.com and then https://github.com

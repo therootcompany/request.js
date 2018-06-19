@@ -1,6 +1,6 @@
 'use strict';
 
-//var request = require('urequest');
+//var request = require('request-lite');
 var request = require('../');
 request('https://www.google.com', function (error, response, body) {
   if (error) {

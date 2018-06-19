@@ -1,5 +1,5 @@
 {
-  "name": "@coolaj86/urequest",
+  "name": "request-lite",
   "version": "1.1.1",
   "description": "A lightweight drop-in replacement for request",
   "main": "index.js",
@@ -11,15 +11,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://git.ppl.family/ppl/urequest.js.git"
+    "url": "https://git.ppl.family/ppl/request-lite.js.git"
   },
   "keywords": [
     "request",
+    "urequest",
     "lightweight",
     "alternative",
     "http",
     "https",
-    "call"
+    "client"
   ],
   "author": "AJ ONeal <coolaj86@gmail.com> (https://coolaj86.com/)",
   "license": "(MIT OR Apache-2.0)"

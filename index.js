@@ -50,8 +50,8 @@ function toJSONifier(keys) {
 function setDefaults(defs) {
   defs = defs || {};
 
-  function urequestHelper(opts, cb) {
-    debug("\n[urequest] processed options:");
+  function requestLiteHelper(opts, cb) {
+    debug("\n[request-lite] processed options:");
     debug(opts);
 
     function onResponse(resp) {
@@ -96,7 +96,7 @@ function setDefaults(defs) {
           }
           opts.url = resp.headers.location;
           opts.uri = url.parse(opts.url);
-          return urequestHelper(opts, cb);
+          return requestLiteHelper(opts, cb);
         }
       }
       if (null === opts.encoding) {
@@ -132,7 +132,7 @@ function setDefaults(defs) {
           }
         }
 
-        debug("\n[urequest] resp.toJSON():");
+        debug("\n[request-lite] resp.toJSON():");
         debug(resp.toJSON());
         cb(null, resp, resp.body);
       });
@@ -169,12 +169,12 @@ function setDefaults(defs) {
     // TODO support unix sockets
     if ('https:' === finalOpts.protocol) {
       // https://nodejs.org/api/https.html#https_https_request_options_callback
-      debug("\n[urequest] https.request(opts):");
+      debug("\n[request-lite] https.request(opts):");
       debug(finalOpts);
       req = https.request(finalOpts, onResponse);
     } else if ('http:' === finalOpts.protocol) {
       // https://nodejs.org/api/http.html#http_http_request_options_callback
-      debug("\n[urequest] http.request(opts):");
+      debug("\n[request-lite] http.request(opts):");
       debug(finalOpts);
       req = http.request(finalOpts, onResponse);
     } else {
@@ -186,7 +186,7 @@ function setDefaults(defs) {
     });
 
     if (_body) {
-      debug("\n[urequest] body");
+      debug("\n[request-lite] body");
       debug(_body);
       // used for chunked encoding
       //req.write(_body);
@@ -197,8 +197,8 @@ function setDefaults(defs) {
     }
   }
 
-  function urequest(opts, cb) {
-    debug("\n[urequest] received options:");
+  function requestLite(opts, cb) {
+    debug("\n[request-lite] received options:");
     debug(opts);
     var reqOpts = {};
     // request.js behavior:
@@ -242,25 +242,25 @@ function setDefaults(defs) {
       }
     });
 
-    return urequestHelper(reqOpts, cb);
+    return requestLiteHelper(reqOpts, cb);
   }
 
-  urequest.defaults = function (_defs) {
+  requestLite.defaults = function (_defs) {
     _defs = mergeOrDelete(defs, _defs);
     return setDefaults(_defs);
   };
   [ 'get', 'put', 'post', 'patch', 'delete', 'head', 'options' ].forEach(function (method) {
-    urequest[method] = function (obj) {
+    requestLite[method] = function (obj) {
       if ('string' === typeof obj) {
         obj = { url: obj };
       }
       obj.method = method.toUpperCase();
-      urequest(obj);
+      requestLite(obj);
     };
   });
-  urequest.del = urequest.delete;
+  requestLite.del = requestLite.delete;
 
-  return urequest;
+  return requestLite;
 }
 
 var _defaults = {
@@ -285,6 +285,6 @@ module.exports._keys = Object.keys(_defaults).concat([
 , 'body'
 , 'json'
 ]);
-module.exports.debug = (-1 !== (process.env.NODE_DEBUG||'').split(/\s+/g).indexOf('urequest'));
+module.exports.debug = (-1 !== (process.env.NODE_DEBUG||'').split(/\s+/g).indexOf('request-lite'));
 
-debug("DEBUG ON for urequest");
+debug("DEBUG ON for request-lite");
