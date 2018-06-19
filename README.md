@@ -9,7 +9,7 @@ Written from scratch.
 µRequest is designed to be a drop-in replacement for request.  It supports HTTPS and follows redirects by default.
 
 ```bash
-npm install @coolaj86/urequest
+npm install --save @coolaj86/urequest
 ```
 
 ```js
