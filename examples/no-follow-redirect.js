@@ -9,7 +9,7 @@ request({ uri: 'https://www.github.com', followRedirect: false }, function (erro
     console.log('error:', error); // Print the error if one occurred
     return;
   }
-  console.log('URI:', response.request.uri); // The final URI
+  console.log('href:', response.request.uri.href); // The final URI
   console.log('statusCode:', response.statusCode); // Should be 301 or 302
   console.log('Location:', response.headers.location); // The redirect
   console.log('Body:', body || JSON.stringify(body));

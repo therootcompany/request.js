@@ -10,15 +10,6 @@ function debug() {
   }
 }
 
-function applyUrl(opts, urlstr) {
-  var urlObj = url.parse(urlstr);
-  opts.url = opts.uri = urlstr;
-  Object.keys(urlObj).forEach(function (key) {
-    opts[key] = urlObj[key];
-  });
-  return opts;
-}
-
 function mergeOrDelete(defaults, updates) {
   Object.keys(defaults).forEach(function (key) {
     if (!(key in updates)) {
@@ -38,31 +29,33 @@ function mergeOrDelete(defaults, updates) {
   return updates;
 }
 
+function toJSONifier(keys) {
+  return function () {
+    var obj = {};
+    var me = this;
+
+    keys.forEach(function (key) {
+      if (me[key] && 'function' === typeof me[key].toJSON) {
+        obj[key] = me[key].toJSON();
+      } else {
+        obj[key] = me[key];
+      }
+    });
+
+    return obj;
+  };
+}
+
 function setDefaults(defs) {
   defs = defs || {};
 
-  function urequest(opts, cb) {
-    var req;
-    // request.js behavior:
-    // encoding: null + json ? unknown
-    // json => attempt to parse, fail silently
-    // encoding => buffer.toString(encoding)
-    // null === encoding => Buffer.concat(buffers)
-    if ('string' === typeof opts) {
-      opts = { url: opts };
-    }
-    if (!opts.method) {
-      opts.method = 'GET';
-    }
-    if (!opts.method) {
-      opts.method = 'GET';
-    }
-    if (opts.url || opts.uri) {
-      opts = applyUrl(opts, opts.url || opts.uri);
-    }
+  function urequestHelper(opts, cb) {
+    debug("[urequest] processed options:");
+    debug(opts);
+
     function onResponse(resp) {
-      var encoding = opts.encoding || defs.encoding;
       var followRedirect;
+
       Object.keys(defs).forEach(function (key) {
         if (key in opts && 'undefined' !== typeof opts[key]) {
           return;
@@ -71,8 +64,14 @@ function setDefaults(defs) {
       });
       followRedirect = opts.followRedirect;
 
+      resp.toJSON = toJSONifier([ 'statusCode', 'body', 'headers', 'request' ]);
+
       resp.request = req;
-      resp.request.uri = opts.uri;
+      resp.request.uri = url.parse(opts.url);
+      //resp.request.method = opts.method;
+      resp.request.headers = opts.headers;
+      resp.request.toJSON = toJSONifier([ 'uri', 'method', 'headers' ]);
+
       if (resp.headers.location && opts.followRedirect) {
         debug('Following redirect: ' + resp.headers.location);
         if (opts.followAllRedirects || -1 !== [ 301, 302 ].indexOf(resp.statusCode)) {
@@ -92,13 +91,14 @@ function setDefaults(defs) {
         }
         if (followRedirect) {
           opts.url = resp.headers.location;
-          return urequest(opts, cb);
+          opts.uri = url.parse(opts.url);
+          return urequestHelper(opts, cb);
         }
         if (opts.removeRefererHeader && opts.headers) {
           delete opts.headers.referer;
         }
       }
-      if (null === encoding) {
+      if (null === opts.encoding) {
         resp._body = [];
       } else {
         resp.body = '';
@@ -106,7 +106,7 @@ function setDefaults(defs) {
       resp._bodyLength = 0;
       resp.on('data', function (chunk) {
         if ('string' === typeof resp.body) {
-          resp.body += chunk.toString(encoding);
+          resp.body += chunk.toString(opts.encoding);
         } else {
           resp._body.push(chunk);
           resp._bodyLength += chunk.length;
@@ -134,30 +134,88 @@ function setDefaults(defs) {
       });
     }
 
-    if (!opts.protocol) {
-      opts.protocol = 'https:';
-    }
-    if ('https:' === opts.protocol) {
-      req = https.request(opts, onResponse);
-    } else if ('http:' === opts.protocol) {
-      req = http.request(opts, onResponse);
+    var req;
+    var finalOpts = {};
+
+    Object.keys(opts.uri).forEach(function (key) {
+      finalOpts[key] = opts.uri[key];
+    });
+    finalOpts.method = opts.method;
+    finalOpts.headers = opts.headers;
+
+    // TODO support unix sockets
+    if ('https:' === finalOpts.protocol) {
+      // https://nodejs.org/api/https.html#https_https_request_options_callback
+      req = https.request(finalOpts, onResponse);
+    } else if ('http:' === finalOpts.protocol) {
+      // https://nodejs.org/api/http.html#http_http_request_options_callback
+      req = http.request(finalOpts, onResponse);
     } else {
-      throw new Error("unknown protocol: '" + opts.protocol + "'");
+      throw new Error("unknown protocol: '" + opts.uri.protocol + "'");
     }
+
     req.on('error', function (e) {
       cb(e);
     });
+
     if (opts.body) {
       if (true === opts.json) {
-        req.end(JSON.stringify(opts.json));
+        req.write(JSON.stringify(opts.json));
       } else {
-        req.end(opts.body);
+        req.write(opts.body);
       }
     } else if (opts.json && true !== opts.json) {
-      req.end(JSON.stringify(opts.json));
-    } else {
-      req.end();
+      req.write(JSON.stringify(opts.json));
     }
+    req.end();
+  }
+
+  function urequest(opts, cb) {
+    debug("[urequest] received options:");
+    debug(opts);
+    var reqOpts = {};
+    // request.js behavior:
+    // encoding: null + json ? unknown
+    // json => attempt to parse, fail silently
+    // encoding => buffer.toString(encoding)
+    // null === encoding => Buffer.concat(buffers)
+    if ('string' === typeof opts) {
+      opts = { url: opts };
+    }
+    if ('string' === typeof opts.url || 'string' === typeof opts.uri) {
+      if ('string' === typeof opts.url) {
+        reqOpts.url = opts.url;
+        reqOpts.uri = url.parse(opts.url);
+      } else if ('string' === typeof opts.uri) {
+        reqOpts.url = opts.uri;
+        reqOpts.uri = url.parse(opts.uri);
+      }
+    } else {
+      if ('object' === typeof opts.uri) {
+        reqOpts.url = url.format(opts.uri);
+        reqOpts.uri = opts.uri;
+        //reqOpts.uri = url.parse(reqOpts.uri);
+      } else if ('object' === typeof opts.url) {
+        reqOpts.url = url.format(opts.url);
+        reqOpts.uri = opts.url;
+        //reqOpts.uri = url.parse(reqOpts.url);
+      }
+    }
+    reqOpts.method = opts.method || 'GET';
+    reqOpts.headers = opts.headers || {};
+    if ((true === reqOpts.json && reqOpts.body) || reqOpts.json) {
+      reqOpts.headers['Content-Type'] = 'application/json';
+    }
+
+    module.exports._keys.forEach(function (key) {
+      if (key in opts && 'undefined' !== typeof opts[key]) {
+        reqOpts[key] = opts[key];
+      } else if (key in defs) {
+        reqOpts[key] = defs[key];
+      }
+    });
+
+    return urequestHelper(reqOpts, cb);
   }
 
   urequest.defaults = function (_defs) {
@@ -178,7 +236,7 @@ function setDefaults(defs) {
   return urequest;
 }
 
-module.exports = setDefaults({
+var _defaults = {
   sendImmediately: true
 , method: 'GET'
 , headers: {}
@@ -190,7 +248,16 @@ module.exports = setDefaults({
 , removeRefererHeader: false
 //, encoding: undefined
 , gzip: false
-});
+//, body: undefined
+//, json: undefined
+};
+module.exports = setDefaults(_defaults);
+
+module.exports._keys = Object.keys(_defaults).concat([
+  'encoding'
+, 'body'
+, 'json'
+]);
 module.exports.debug = (-1 !== (process.env.NODE_DEBUG||'').split(/\s+/g).indexOf('urequest'));
 
 debug("DEBUG ON for urequest");
