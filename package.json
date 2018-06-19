@@ -1,5 +1,5 @@
 {
-  "name": "urequest",
+  "name": "@coolaj86/urequest",
   "version": "1.0.0",
   "description": "A lightweight drop-in replacement for request",
   "main": "index.js",
