@@ -1,0 +1,26 @@
+{
+  "name": "urequest",
+  "version": "1.0.0",
+  "description": "A lightweight drop-in replacement for request",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.ppl.family/ppl/urequest.js.git"
+  },
+  "keywords": [
+    "request",
+    "lightweight",
+    "alternative",
+    "http",
+    "https",
+    "call"
+  ],
+  "author": "AJ ONeal <coolaj86@gmail.com> (https://coolaj86.com/)",
+  "license": "(MIT OR Apache-2.0)"
+}
