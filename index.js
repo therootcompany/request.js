@@ -29,6 +29,14 @@ function mergeOrDelete(defaults, updates) {
   return updates;
 }
 
+function hasHeader(reqOpts, header) {
+  var headers = {};
+  Object.keys(reqOpts.headers).forEach(function (key) {
+    headers[key.toLowerCase()] = true;
+  });
+  return headers[header.toLowerCase()];
+}
+
 function toJSONifier(keys) {
 
   return function () {
@@ -186,7 +194,7 @@ function setDefaults(defs) {
     });
 
     if (_body) {
-      debug("\n[urequest] body");
+      debug("\n[urequest] '" + finalOpts.method + "' (request) body");
       debug(_body);
       // used for chunked encoding
       //req.write(_body);
@@ -209,6 +217,16 @@ function setDefaults(defs) {
     if ('string' === typeof opts) {
       opts = { url: opts };
     }
+
+    module.exports._keys.forEach(function (key) {
+      if (key in opts && 'undefined' !== typeof opts[key]) {
+        reqOpts[key] = opts[key];
+      } else if (key in defs) {
+        reqOpts[key] = defs[key];
+      }
+    });
+
+    // TODO url.resolve(defs.baseUrl, opts.url);
     if ('string' === typeof opts.url || 'string' === typeof opts.uri) {
       if ('string' === typeof opts.url) {
         reqOpts.url = opts.url;
@@ -228,19 +246,17 @@ function setDefaults(defs) {
         //reqOpts.uri = url.parse(reqOpts.url);
       }
     }
-    reqOpts.method = (opts.method || 'GET').toUpperCase();
-    reqOpts.headers = opts.headers || {};
-    if ((true === reqOpts.json && reqOpts.body) || reqOpts.json) {
-      reqOpts.headers['Content-Type'] = 'application/json';
-    }
 
-    module.exports._keys.forEach(function (key) {
-      if (key in opts && 'undefined' !== typeof opts[key]) {
-        reqOpts[key] = opts[key];
-      } else if (key in defs) {
-        reqOpts[key] = defs[key];
+    reqOpts.method = (reqOpts.method || 'GET').toUpperCase();
+    reqOpts.headers = reqOpts.headers || {};
+
+    // crazy case for easier testing
+    if (!hasHeader(reqOpts, 'CoNTeNT-TyPe')) {
+      if ((true === reqOpts.json && reqOpts.body)
+        || (true !== reqOpts.json && reqOpts.json)) {
+        reqOpts.headers['Content-Type'] = 'application/json';
       }
-    });
+    }
 
     return urequestHelper(reqOpts, cb);
   }
