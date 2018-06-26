@@ -186,7 +186,8 @@ function setDefaults(defs) {
       debug(finalOpts);
       req = http.request(finalOpts, onResponse);
     } else {
-      throw new Error("unknown protocol: '" + opts.uri.protocol + "'");
+      cb(new Error("unknown protocol: '" + opts.uri.protocol + "'"));
+      return;
     }
 
     req.on('error', function (e) {
