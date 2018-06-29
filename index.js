@@ -213,11 +213,16 @@ function setDefaults(defs) {
     if ('unix' !== (obj.hostname||obj.host||'').toLowerCase()) {
       return obj;
     }
-    obj.hostname = null;
+
+    obj.href = null;
+    obj.hostname = obj.host = null;
+
     paths = (obj.pathname||obj.path||'').split(':');
+
     obj.socketPath = paths.shift();
     obj.pathname = obj.path = paths.join(':');
-    obj.href = null;
+
+    return obj;
   }
 
   function urequest(opts, cb) {
