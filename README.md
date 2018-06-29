@@ -21,6 +21,57 @@ request('http://www.google.com', function (error, response, body) {
 });
 ```
 
+## Table of contents
+
+- [Custom HTTP Headers](#custom-http-headers)
+- [Unix Domain Sockets](#unix-domain-sockets)
+- [**All Available Options**](#requestoptions-callback)
+
+## Custom HTTP Headers
+
+HTTP Headers, such as `User-Agent`, can be set in the `options` object.
+In the example below, we call the github API to find out the number
+of stars and forks for the request repository. This requires a
+custom `User-Agent` header as well as https.
+
+```js
+var request = require('request');
+
+var options = {
+  url: 'https://api.github.com/repos/request/request',
+  headers: {
+    'User-Agent': 'request'
+  }
+};
+
+function callback(error, response, body) {
+  if (!error && response.statusCode == 200) {
+    var info = JSON.parse(body);
+    console.log(info.stargazers_count + " Stars");
+    console.log(info.forks_count + " Forks");
+  }
+}
+
+request(options, callback);
+```
+
+[back to top](#table-of-contents)
+
+---
+
+## UNIX Domain Sockets
+
+`request` supports making requests to [UNIX Domain Sockets](https://en.wikipedia.org/wiki/Unix_domain_socket). To make one, use the following URL scheme:
+
+```js
+/* Pattern */ 'http://unix:SOCKET:PATH'
+/* Example */ request.get('http://unix:/absolute/path/to/unix.socket:/request/path')
+```
+
+Note: The `SOCKET` path is assumed to be absolute to the root of the host file system.
+
+[back to top](#table-of-contents)
+
 ---
 
 ## request(options, callback)
@@ -133,3 +184,5 @@ There are at least <!--three--> two ways to debug the operation of `request`:
 
 [back to top](#table-of-contents)
 -->
+
+[back to top](#table-of-contents)

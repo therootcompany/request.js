@@ -102,6 +102,7 @@ function setDefaults(defs) {
           if (opts.removeRefererHeader && opts.headers) {
             delete opts.headers.referer;
           }
+          // TODO needs baseUrl, maybe test for host / socketPath?
           opts.url = resp.headers.location;
           opts.uri = url.parse(opts.url);
           return urequestHelper(opts, cb);
@@ -206,6 +207,19 @@ function setDefaults(defs) {
     }
   }
 
+  function parseUrl(str) {
+    var obj = url.parse(str);
+    var paths;
+    if ('unix' !== (obj.hostname||obj.host||'').toLowerCase()) {
+      return obj;
+    }
+    obj.hostname = null;
+    paths = (obj.pathname||obj.path||'').split(':');
+    obj.socketPath = paths.shift();
+    obj.pathname = obj.path = paths.join(':');
+    obj.href = null;
+  }
+
   function urequest(opts, cb) {
     debug("\n[urequest] received options:");
     debug(opts);
@@ -231,10 +245,10 @@ function setDefaults(defs) {
     if ('string' === typeof opts.url || 'string' === typeof opts.uri) {
       if ('string' === typeof opts.url) {
         reqOpts.url = opts.url;
-        reqOpts.uri = url.parse(opts.url);
+        reqOpts.uri = parseUrl(opts.url);
       } else if ('string' === typeof opts.uri) {
         reqOpts.url = opts.uri;
-        reqOpts.uri = url.parse(opts.uri);
+        reqOpts.uri = parseUrl(opts.uri);
       }
     } else {
       if ('object' === typeof opts.uri) {
