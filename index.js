@@ -150,6 +150,10 @@ function setDefaults(defs) {
     var req;
     var finalOpts = {};
     var _body;
+    var MyFormData;
+    var form;
+    var formHeaders;
+    var requester;
 
     if (opts.body) {
       if (true === opts.json) {
@@ -174,26 +178,62 @@ function setDefaults(defs) {
       // chunked is generally only well-supported downstream
       //finalOpts.headers['Content-Length'] = _body.byteLength || _body.length;
     }
+    if (opts.formData) {
+      try {
+        MyFormData = opts.FormData || require('form-data');
+        // potential options https://github.com/felixge/node-combined-stream/blob/master/lib/combined_stream.js#L7-L15
+      } catch(e) {
+        console.error("urequest does not include extra dependencies by default");
+        console.error("if you need to use 'form-data' you may install it, like so:");
+        console.error("  npm install --save form-data");
+        cb(e);
+        return;
+      }
+      try {
+        form = new MyFormData();
+        Object.keys(opts.formData).forEach(function (key) {
+          form.append(key, opts.formData[key]);
+        });
+      } catch(e) {
+        cb(e);
+        return;
+      }
+      formHeaders = form.getHeaders();
+      Object.keys(formHeaders).forEach(function (header) {
+        finalOpts.headers[header] = formHeaders[header];
+      });
+    }
 
     // TODO support unix sockets
     if ('https:' === finalOpts.protocol) {
       // https://nodejs.org/api/https.html#https_https_request_options_callback
       debug("\n[urequest] https.request(opts):");
       debug(finalOpts);
-      req = https.request(finalOpts, onResponse);
+      requester = https;
     } else if ('http:' === finalOpts.protocol) {
       // https://nodejs.org/api/http.html#http_http_request_options_callback
       debug("\n[urequest] http.request(opts):");
       debug(finalOpts);
-      req = http.request(finalOpts, onResponse);
+      requester = http;
     } else {
       cb(new Error("unknown protocol: '" + opts.uri.protocol + "'"));
       return;
     }
 
-    req.on('error', function (e) {
-      cb(e);
-    });
+    if (form) {
+      debug("\n[urequest] '" + finalOpts.method + "' (request) form");
+      debug(formHeaders);
+      // generally uploads don't use Chunked Encoding (some systems have issues with it)
+      // and I don't want to do the work to calculate the content-lengths. This seems to work.
+      form.submit(finalOpts, onResponse);
+      //req = requester.request(finalOpts, onResponse);
+      //req.on('error', cb);
+      //form.pipe(req);
+      return;
+    }
+
+    req = requester.request(finalOpts, onResponse);
+    req.on('error', cb);
 
     if (_body) {
       debug("\n[urequest] '" + finalOpts.method + "' (request) body");
@@ -320,6 +360,8 @@ module.exports._keys = Object.keys(_defaults).concat([
   'encoding'
 , 'body'
 , 'json'
+, 'formData'
+, 'FormData'
 ]);
 module.exports.debug = (-1 !== (process.env.NODE_DEBUG||'').split(/\s+/g).indexOf('urequest'));
 
