@@ -8,15 +8,9 @@ var request = require('../');
 // will redirect to https://www.github.com and then https://github.com
 //request('http://www.github.com', function (error, response, body) {
 request(
-  //{ url: 'http://postb.in/syfxxnko'
-  { url: 'http://localhost:3007/form-data/'
-  , headers: {
-      'X-Foo': 'Bar'
-    }
-  , formData: {
-      foo: 'bar'
-    , baz: require('fs').createReadStream(require('path').join(__dirname, 'get-to-json.js'))
-    }
+  { url: 'http://postb.in/2meyt50C'
+  , headers: { 'X-Foo': 'Bar' }
+  , form: { foo: 'bar', baz: 'qux' }
   }
 , function (error, response, body) {
     if (error) {

@@ -163,6 +163,15 @@ function setDefaults(defs) {
       }
     } else if (opts.json && true !== opts.json) {
       _body = JSON.stringify(opts.json);
+    } else if (opts.form) {
+      _body = Object.keys(opts.form).filter(function (key) {
+        if ('undefined' !== typeof opts.form[key]) {
+          return true;
+        }
+      }).map(function (key) {
+        return encodeURIComponent(key) + '=' + encodeURIComponent(String(opts.form[key]));
+      }).join('&');
+      opts.headers['Content-Type'] = 'application/x-www-form-urlencoded';
     }
     if ('string' === typeof _body) {
       _body = Buffer.from(_body);
@@ -175,8 +184,8 @@ function setDefaults(defs) {
     finalOpts.headers = opts.headers;
     if (_body) {
       // Most APIs expect (or require) Content-Length except in the case of multipart uploads
-      // chunked is generally only well-supported downstream
-      //finalOpts.headers['Content-Length'] = _body.byteLength || _body.length;
+      // Transfer-Encoding: Chunked (the default) is generally only well-supported downstream
+      finalOpts.headers['Content-Length'] = _body.byteLength || _body.length;
     }
     if (opts.formData) {
       try {
@@ -192,7 +201,17 @@ function setDefaults(defs) {
       try {
         form = new MyFormData();
         Object.keys(opts.formData).forEach(function (key) {
-          form.append(key, opts.formData[key]);
+          function add(key, data, opts) {
+            if (data.value) { opts = data.options; data = data.value; }
+            form.append(key, data, opts);
+          }
+          if (Array.isArray(opts.formData[key])) {
+            opts.formData[key].forEach(function (data) {
+              add(key, data);
+            });
+          } else {
+            add(key, opts.formData[key]);
+          }
         });
       } catch(e) {
         cb(e);
@@ -307,7 +326,11 @@ function setDefaults(defs) {
       }
     }
 
-    reqOpts.method = (reqOpts.method || 'GET').toUpperCase();
+    if (opts.body || opts.json || opts.form || opts.formData) {
+      reqOpts.method = (reqOpts.method || 'POST').toUpperCase();
+    } else {
+      reqOpts.method = (reqOpts.method || 'GET').toUpperCase();
+    }
     reqOpts.headers = reqOpts.headers || {};
 
     // crazy case for easier testing
@@ -360,6 +383,7 @@ module.exports._keys = Object.keys(_defaults).concat([
   'encoding'
 , 'body'
 , 'json'
+, 'form'
 , 'formData'
 , 'FormData'
 ]);
