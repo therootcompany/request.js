@@ -260,7 +260,11 @@ function setDefaults(defs) {
       debug(formHeaders);
       // generally uploads don't use Chunked Encoding (some systems have issues with it)
       // and I don't want to do the work to calculate the content-lengths. This seems to work.
-      form.submit(finalOpts, onResponse);
+      form.submit(finalOpts, function (err, resp) {
+        if (err) { cb(err); }
+        onResponse(resp);
+        resp.resume();
+      });
       //req = requester.request(finalOpts, onResponse);
       //req.on('error', cb);
       //form.pipe(req);
