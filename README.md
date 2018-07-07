@@ -134,7 +134,7 @@ request(options, callback);
 
 ## UNIX Domain Sockets
 
-`request` supports making requests to [UNIX Domain Sockets](https://en.wikipedia.org/wiki/Unix_domain_socket). To make one, use the following URL scheme:
+`urequest` supports making requests to [UNIX Domain Sockets](https://en.wikipedia.org/wiki/Unix_domain_socket). To make one, use the following URL scheme:
 
 ```js
 /* Pattern */ 'http://unix:SOCKET:PATH'
