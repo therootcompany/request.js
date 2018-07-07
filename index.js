@@ -187,6 +187,22 @@ function setDefaults(defs) {
       // Transfer-Encoding: Chunked (the default) is generally only well-supported downstream
       finalOpts.headers['Content-Length'] = _body.byteLength || _body.length;
     }
+    if (opts.auth) {
+      // if opts.uri specifies auth it will be parsed by url.parse and passed directly to the http module
+      if ('string' !== typeof opts.auth) {
+        opts.auth = (opts.auth.user||opts.auth.username||'') + ':' + (opts.auth.pass||opts.auth.password||'');
+      }
+      if ('string' === typeof opts.auth) {
+        finalOpts.auth = opts.auth;
+      }
+      if (false === opts.sendImmediately) {
+        console.warn("[Warn] setting `sendImmediately: false` is not yet supported. Please open an issue if this is an important feature that you need.");
+      }
+      if (opts.bearer) {
+        // having a shortcut for base64 encoding makes sense, but this? Eh, whatevs...
+        finalOpts.header.Authorization = 'Bearer: ' + opts.bearer;
+      }
+    }
     if (opts.formData) {
       try {
         MyFormData = opts.FormData || require('form-data');
@@ -384,6 +400,7 @@ module.exports._keys = Object.keys(_defaults).concat([
 , 'body'
 , 'json'
 , 'form'
+, 'auth'
 , 'formData'
 , 'FormData'
 ]);
