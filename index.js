@@ -172,7 +172,7 @@ function setDefaults(defs) {
     if (_body) {
       // Most APIs expect (or require) Content-Length except in the case of multipart uploads
       // chunked is generally only well-supported downstream
-      //finalOpts.headers['Content-Length'] = _body.byteLength || _body.length;
+      finalOpts.headers['Content-Length'] = _body.byteLength || _body.length;
     }
 
     // TODO support unix sockets
