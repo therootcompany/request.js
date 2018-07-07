@@ -342,7 +342,7 @@ function setDefaults(defs) {
       }
     }
 
-    if (opts.body || opts.json || opts.form || opts.formData) {
+    if (opts.body || 'string' === typeof opts.json || opts.form || opts.formData) {
       reqOpts.method = (reqOpts.method || 'POST').toUpperCase();
     } else {
       reqOpts.method = (reqOpts.method || 'GET').toUpperCase();
