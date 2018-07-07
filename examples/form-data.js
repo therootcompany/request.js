@@ -10,9 +10,8 @@ var request = require('../');
 request(
   //{ url: 'http://postb.in/syfxxnko'
   { url: 'http://localhost:3007/form-data/'
-  , headers: {
-      'X-Foo': 'Bar'
-    }
+  , method: 'POST'
+  , headers: { 'X-Foo': 'Bar' }
   , formData: {
       foo: 'bar'
     , baz: require('fs').createReadStream(require('path').join(__dirname, 'get-to-json.js'))

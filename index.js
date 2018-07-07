@@ -343,6 +343,8 @@ function setDefaults(defs) {
     }
 
     if (opts.body || 'string' === typeof opts.json || opts.form || opts.formData) {
+      // TODO this is probably a deviation from request's API
+      // need to check and probably eliminate it
       reqOpts.method = (reqOpts.method || 'POST').toUpperCase();
     } else {
       reqOpts.method = (reqOpts.method || 'GET').toUpperCase();

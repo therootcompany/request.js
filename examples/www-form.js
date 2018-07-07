@@ -9,6 +9,7 @@ var request = require('../');
 //request('http://www.github.com', function (error, response, body) {
 request(
   { url: 'http://postb.in/2meyt50C'
+  , method: 'POST'
   , headers: { 'X-Foo': 'Bar' }
   , form: { foo: 'bar', baz: 'qux' }
   }
