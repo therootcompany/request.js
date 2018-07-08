@@ -82,7 +82,7 @@ function setDefaults(defs) {
       resp.request = req;
       resp.request.uri = url.parse(opts.url);
       //resp.request.method = opts.method;
-      resp.request.headers = opts.headers;
+      resp.request.headers = finalOpts.headers;
       resp.request.toJSON = toJSONifier([ 'uri', 'method', 'headers' ]);
 
       if (followRedirect && resp.headers.location && -1 !== [ 301, 302 ].indexOf(resp.statusCode)) {
@@ -267,7 +267,7 @@ function setDefaults(defs) {
       // generally uploads don't use Chunked Encoding (some systems have issues with it)
       // and I don't want to do the work to calculate the content-lengths. This seems to work.
       req = form.submit(finalOpts, function (err, resp) {
-        if (err) { cb(err); }
+        if (err) { cb(err); return; }
         onResponse(resp);
         resp.resume();
       });

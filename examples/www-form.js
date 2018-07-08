@@ -20,5 +20,6 @@ request(
     }
     console.log('statusCode:', response.statusCode); // The final statusCode
     console.log('Body Length:', body.length); // body length
+    console.log('Response:', response.toJSON()); // body length
   }
 );
