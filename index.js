@@ -29,12 +29,16 @@ function mergeOrDelete(defaults, updates) {
   return updates;
 }
 
-function hasHeader(reqOpts, header) {
+function getHeaderName(reqOpts, header) {
   var headers = {};
   Object.keys(reqOpts.headers).forEach(function (key) {
-    headers[key.toLowerCase()] = true;
+    headers[key.toLowerCase()] = key;
   });
+  // returns the key, which in erroneous cases could be an empty string
   return headers[header.toLowerCase()];
+}
+function hasHeader(reqOpts, header) {
+  return 'undefined' !== typeof getHeaderName(reqOpts, header);
 }
 
 function toJSONifier(keys) {
@@ -98,6 +102,8 @@ function setDefaults(defs) {
           if (!opts.followOriginalHttpMethod) {
             opts.method = 'GET';
             opts.body = null;
+            delete opts.headers[getHeaderName(opts.headers, 'Content-Length')];
+            delete opts.headers[getHeaderName(opts.headers, 'Transfer-Encoding')];
           }
           if (opts.removeRefererHeader && opts.headers) {
             delete opts.headers.referer;
@@ -181,7 +187,7 @@ function setDefaults(defs) {
       finalOpts[key] = opts.uri[key];
     });
     finalOpts.method = opts.method;
-    finalOpts.headers = opts.headers;
+    finalOpts.headers = JSON.parse(JSON.stringify(opts.headers));
     if (_body) {
       // Most APIs expect (or require) Content-Length except in the case of multipart uploads
       // Transfer-Encoding: Chunked (the default) is generally only well-supported downstream
@@ -353,7 +359,9 @@ function setDefaults(defs) {
     } else {
       reqOpts.method = (reqOpts.method || 'GET').toUpperCase();
     }
-    reqOpts.headers = reqOpts.headers || {};
+    if (!reqOpts.headers) {
+      reqOpts.headers = {};
+    }
 
     // crazy case for easier testing
     if (!hasHeader(reqOpts, 'CoNTeNT-TyPe')) {
