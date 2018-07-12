@@ -29,14 +29,16 @@ function mergeOrDelete(defaults, updates) {
   return updates;
 }
 
+// retrieves an existing header, case-sensitive
 function getHeaderName(reqOpts, header) {
-  var headers = {};
-  Object.keys(reqOpts.headers).forEach(function (key) {
-    headers[key.toLowerCase()] = key;
+  var headerNames = {};
+  Object.keys(reqOpts.headers).forEach(function (casedName) {
+    headerNames[casedName.toLowerCase()] = casedName;
   });
   // returns the key, which in erroneous cases could be an empty string
-  return headers[header.toLowerCase()];
+  return headerNames[header.toLowerCase()];
 }
+// returns whether or not a header exists, case-insensitive
 function hasHeader(reqOpts, header) {
   return 'undefined' !== typeof getHeaderName(reqOpts, header);
 }
