@@ -85,7 +85,7 @@ function setDefaults(defs) {
       resp.request.headers = finalOpts.headers;
       resp.request.toJSON = toJSONifier([ 'uri', 'method', 'headers' ]);
 
-      if (followRedirect && resp.headers.location && -1 !== [ 301, 302 ].indexOf(resp.statusCode)) {
+      if (followRedirect && resp.headers.location && -1 !== [ 301, 302, 307, 308 ].indexOf(resp.statusCode)) {
         debug('Following redirect: ' + resp.headers.location);
         if ('GET' !== opts.method && !opts.followAllRedirects) {
           followRedirect = false;
