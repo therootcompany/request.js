@@ -102,8 +102,8 @@ function setDefaults(defs) {
           if (!opts.followOriginalHttpMethod) {
             opts.method = 'GET';
             opts.body = null;
-            delete opts.headers[getHeaderName(opts.headers, 'Content-Length')];
-            delete opts.headers[getHeaderName(opts.headers, 'Transfer-Encoding')];
+            delete opts.headers[getHeaderName(opts, 'Content-Length')];
+            delete opts.headers[getHeaderName(opts, 'Transfer-Encoding')];
           }
           if (opts.removeRefererHeader && opts.headers) {
             delete opts.headers.referer;
