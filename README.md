@@ -53,6 +53,11 @@ request.post('http://service.com/upload').form({key:'value'})
 
 For `multipart/form-data` we use the [form-data](https://github.com/form-data/form-data) library by [@felixge](https://github.com/felixge). For the most cases, you can pass your upload form data via the `formData` option.
 
+To use `form-data`, you must install it separately:
+
+```bash
+npm install --save form-data@2
+```
 
 ```js
 var formData = {
