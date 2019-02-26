@@ -188,6 +188,16 @@ function setDefaults(defs) {
     Object.keys(opts.uri).forEach(function (key) {
       finalOpts[key] = opts.uri[key];
     });
+
+    // A bug should be raised if request does it differently,
+    // but I think we're supposed to pass all acceptable options
+    // on to the raw http request
+    [ 'family', 'host', 'localAddress', 'agent', 'createConnection'
+    , 'timeout', 'setHost'
+    ].forEach(function (key) {
+      finalOpts[key] = opts.uri[key];
+    });
+
     finalOpts.method = opts.method;
     finalOpts.headers = JSON.parse(JSON.stringify(opts.headers));
     if (_body) {
