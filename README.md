@@ -1,5 +1,7 @@
 # µRequest - Minimalist HTTP client
 
+A [Root](https://rootprojects.org) Project
+
 A lightweight alternative to (and drop-in replacement for) request.
 
 Written from scratch.
