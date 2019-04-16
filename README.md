@@ -1,8 +1,10 @@
-# µRequest - Minimalist HTTP client | a [Root](https://rootprojects.org) project
+# [µRequest](https://git.rootprojects.org/root/request.js) | a [Root](https://rootprojects.org) project
+
+> Minimalist HTTP client
 
 A lightweight alternative to (and drop-in replacement for) request.
 
-Written from scratch.
+Written from scratch, with zero-dependencies.
 
 ## Super simple to use
 
