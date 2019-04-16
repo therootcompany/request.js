@@ -1,6 +1,4 @@
-# µRequest - Minimalist HTTP client
-
-A [Root](https://rootprojects.org) Project
+# µRequest - Minimalist HTTP client | a [Root](https://rootprojects.org) project
 
 A lightweight alternative to (and drop-in replacement for) request.
 
@@ -11,11 +9,11 @@ Written from scratch.
 µRequest is designed to be a drop-in replacement for request.  It supports HTTPS and follows redirects by default.
 
 ```bash
-npm install --save @coolaj86/urequest
+npm install --save @root/request
 ```
 
 ```js
-var request = require('@coolaj86/urequest');
+var request = require('@root/request');
 request('http://www.google.com', function (error, response, body) {
   console.log('error:', error); // Print the error if one occurred
   console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
@@ -333,7 +331,7 @@ There are at least <!--three--> two ways to debug the operation of `request`:
 1. Launch the node process like `NODE_DEBUG=urequest node script.js`
    (`lib,request,otherlib` works too).
 
-2. Set `require('@coolaj86/urequest').debug = true` at any time (this does the same thing
+2. Set `require('@root/request').debug = true` at any time (this does the same thing
    as #1).
 
 <!-- TODO
