@@ -391,12 +391,12 @@ function setDefaults(defs) {
     return setDefaults(_defs);
   };
   [ 'get', 'put', 'post', 'patch', 'delete', 'head', 'options' ].forEach(function (method) {
-    urequest[method] = function (obj) {
+    urequest[method] = function (obj, cb) {
       if ('string' === typeof obj) {
         obj = { url: obj };
       }
       obj.method = method.toUpperCase();
-      urequest(obj);
+      urequest(obj, cb);
     };
   });
   urequest.del = urequest.delete;
