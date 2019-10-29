@@ -70,6 +70,9 @@ function setDefaults(defs) {
         debug('\n[urequest] processed options:');
         debug(opts);
 
+        var req;
+        var finalOpts = {};
+
         function onResponse(resp) {
             var followRedirect;
 
@@ -93,6 +96,10 @@ function setDefaults(defs) {
             //resp.request.method = opts.method;
             resp.request.headers = finalOpts.headers;
             resp.request.toJSON = toJSONifier(['uri', 'method', 'headers']);
+            if (opts.debug) {
+                console.debug('[@root/request] Response Headers:');
+                console.debug(resp.toJSON());
+            }
 
             if (
                 followRedirect &&
@@ -166,12 +173,14 @@ function setDefaults(defs) {
 
                 debug('\n[urequest] resp.toJSON():');
                 debug(resp.toJSON());
+                if (opts.debug) {
+                    console.debug('[@root/request] Response Body:');
+                    console.debug(resp.body);
+                }
                 cb(null, resp, resp.body);
             });
         }
 
-        var req;
-        var finalOpts = {};
         var _body;
         var MyFormData;
         var form;
@@ -334,7 +343,15 @@ function setDefaults(defs) {
         }
 
         if (opts.debug) {
+            console.debug('');
+            console.debug('[@root/request] Request Options:');
             console.debug(finalOpts);
+            if (_body) {
+                console.debug('[@root/request] Request Body:');
+                console.debug(
+                    opts.body || opts.form || opts.formData || opts.json
+                );
+            }
         }
         req = requester.request(finalOpts, onResponse);
         req.on('error', cb);
@@ -443,24 +460,46 @@ function setDefaults(defs) {
         return urequestHelper(reqOpts, cb);
     }
 
-    urequest.defaults = function(_defs) {
+    function smartPromisify(fn) {
+        return function(opts) {
+            var cb;
+            if ('function' === typeof arguments[1]) {
+                cb = Array.prototype.slice.call(arguments)[1];
+                return fn(opts, cb);
+            }
+            return new Promise(function(resolve, reject) {
+                fn(opts, function(err, resp) {
+                    if (err) {
+                        err._response = resp;
+                        reject(err);
+                        return;
+                    }
+                    resolve(resp);
+                });
+            });
+        };
+    }
+
+    var smartUrequest = smartPromisify(urequest);
+
+    smartUrequest.defaults = function(_defs) {
         _defs = mergeOrDelete(defs, _defs);
         return setDefaults(_defs);
     };
     ['get', 'put', 'post', 'patch', 'delete', 'head', 'options'].forEach(
         function(method) {
-            urequest[method] = function(obj, cb) {
+            smartUrequest[method] = smartPromisify(function(obj, cb) {
                 if ('string' === typeof obj) {
                     obj = { url: obj };
                 }
                 obj.method = method.toUpperCase();
                 urequest(obj, cb);
-            };
+            });
         }
     );
-    urequest.del = urequest.delete;
+    smartUrequest.del = urequest.delete;
 
-    return urequest;
+    return smartUrequest;
 }
 
 var _defaults = {
