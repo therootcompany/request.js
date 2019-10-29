@@ -333,6 +333,9 @@ function setDefaults(defs) {
             return;
         }
 
+        if (opts.debug) {
+            console.debug(finalOpts);
+        }
         req = requester.request(finalOpts, onResponse);
         req.on('error', cb);
 
@@ -410,7 +413,7 @@ function setDefaults(defs) {
 
         if (
             opts.body ||
-            'string' === typeof opts.json ||
+            (opts.json && true !== opts.json) ||
             opts.form ||
             opts.formData
         ) {
@@ -434,6 +437,9 @@ function setDefaults(defs) {
             }
         }
 
+        if (opts.debug) {
+            reqOpts.debug = opts.debug;
+        }
         return urequestHelper(reqOpts, cb);
     }
 
