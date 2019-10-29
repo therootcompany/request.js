@@ -8,7 +8,7 @@ Written from scratch, with zero-dependencies.
 
 ## Super simple to use
 
-µRequest is designed to be a drop-in replacement for request.  It supports HTTPS and follows redirects by default.
+µRequest is designed to be a drop-in replacement for request. It supports HTTPS and follows redirects by default.
 
 ```bash
 npm install --save @root/request
@@ -16,10 +16,10 @@ npm install --save @root/request
 
 ```js
 var request = require('@root/request');
-request('http://www.google.com', function (error, response, body) {
-  console.log('error:', error); // Print the error if one occurred
-  console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-  console.log('body:', body); // Print the HTML for the Google homepage.
+request('http://www.google.com', function(error, response, body) {
+    console.log('error:', error); // Print the error if one occurred
+    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    console.log('body:', body); // Print the HTML for the Google homepage.
 });
 ```
 
@@ -30,25 +30,28 @@ var promisify = require('util').promisify;
 var request = require('@root/request');
 request = promisify(request);
 
-request('http://www.google.com').then(function (response) {
-  console.log('statusCode:', response.statusCode); // Print the response status code if a response was received
-  console.log('body:', response.body); // Print the HTML for the Google homepage.
-}).catch(function (error) {
-  console.log('error:', error); // Print the error if one occurred
-});
+request('http://www.google.com')
+    .then(function(response) {
+        console.log('statusCode:', response.statusCode); // Print the response status code if a response was received
+        console.log('body:', response.body); // Print the HTML for the Google homepage.
+    })
+    .catch(function(error) {
+        console.log('error:', error); // Print the error if one occurred
+    });
 ```
 
 ## Table of contents
 
-- [Forms](#forms)
-- [HTTP Authentication](#http-authentication)
-- [Custom HTTP Headers](#custom-http-headers)
-- [Unix Domain Sockets](#unix-domain-sockets)
-- [**All Available Options**](#requestoptions-callback)
+-   [Forms](#forms)
+-   [HTTP Authentication](#http-authentication)
+-   [Custom HTTP Headers](#custom-http-headers)
+-   [Unix Domain Sockets](#unix-domain-sockets)
+-   [**All Available Options**](#requestoptions-callback)
 
 ## Forms
 
 `urequest` supports `application/x-www-form-urlencoded` and `multipart/form-data` form uploads.
+
 <!-- For `multipart/related` refer to the `multipart` API. -->
 
 #### application/x-www-form-urlencoded (URL-Encoded Forms)
@@ -56,15 +59,20 @@ request('http://www.google.com').then(function (response) {
 URL-encoded forms are simple.
 
 ```js
-request.post('http://service.com/upload', {form:{key:'value'}})
+request.post('http://service.com/upload', { form: { key: 'value' } });
 // or
-request.post({url:'http://service.com/upload', form: {key:'value'}}, function(err,httpResponse,body){ /* ... */ })
+request.post(
+    { url: 'http://service.com/upload', form: { key: 'value' } },
+    function(err, httpResponse, body) {
+        /* ... */
+    }
+);
 ```
+
 <!--
 // or
 request.post('http://service.com/upload').form({key:'value'})
 -->
-
 
 #### multipart/form-data (Multipart Form Uploads)
 
@@ -78,35 +86,39 @@ npm install --save form-data@2
 
 ```js
 var formData = {
-  // Pass a simple key-value pair
-  my_field: 'my_value',
-  // Pass data via Buffers
-  my_buffer: Buffer.from([1, 2, 3]),
-  // Pass data via Streams
-  my_file: fs.createReadStream(__dirname + '/unicycle.jpg'),
-  // Pass multiple values /w an Array
-  attachments: [
-    fs.createReadStream(__dirname + '/attachment1.jpg'),
-    fs.createReadStream(__dirname + '/attachment2.jpg')
-  ],
-  // Pass optional meta-data with an 'options' object with style: {value: DATA, options: OPTIONS}
-  // Use case: for some types of streams, you'll need to provide "file"-related information manually.
-  // See the `form-data` README for more information about options: https://github.com/form-data/form-data
-  custom_file: {
-    value:  fs.createReadStream('/dev/urandom'),
-    options: {
-      filename: 'topsecret.jpg',
-      contentType: 'image/jpeg'
+    // Pass a simple key-value pair
+    my_field: 'my_value',
+    // Pass data via Buffers
+    my_buffer: Buffer.from([1, 2, 3]),
+    // Pass data via Streams
+    my_file: fs.createReadStream(__dirname + '/unicycle.jpg'),
+    // Pass multiple values /w an Array
+    attachments: [
+        fs.createReadStream(__dirname + '/attachment1.jpg'),
+        fs.createReadStream(__dirname + '/attachment2.jpg')
+    ],
+    // Pass optional meta-data with an 'options' object with style: {value: DATA, options: OPTIONS}
+    // Use case: for some types of streams, you'll need to provide "file"-related information manually.
+    // See the `form-data` README for more information about options: https://github.com/form-data/form-data
+    custom_file: {
+        value: fs.createReadStream('/dev/urandom'),
+        options: {
+            filename: 'topsecret.jpg',
+            contentType: 'image/jpeg'
+        }
     }
-  }
 };
-request.post({url:'http://service.com/upload', formData: formData}, function optionalCallback(err, httpResponse, body) {
-  if (err) {
-    return console.error('upload failed:', err);
-  }
-  console.log('Upload successful!  Server responded with:', body);
-});
+request.post(
+    { url: 'http://service.com/upload', formData: formData },
+    function optionalCallback(err, httpResponse, body) {
+        if (err) {
+            return console.error('upload failed:', err);
+        }
+        console.log('Upload successful!  Server responded with:', body);
+    }
+);
 ```
+
 <!--
 
 For advanced cases, you can access the form-data object itself via `r.form()`. This can be modified until the request is fired on the next cycle of the event-loop. (Note that this calling `form()` will clear the currently set form data for that request.)
@@ -133,27 +145,28 @@ request.get('http://some.server.com/').auth('username', 'password', false);
 request.get('http://some.server.com/').auth(null, null, true, 'bearerToken');
 // or
 -->
+
 ```js
 request.get('http://some.server.com/', {
-  'auth': {
-    'user': 'username',
-    'pass': 'password',
-    'sendImmediately': false
-  }
+    auth: {
+        user: 'username',
+        pass: 'password',
+        sendImmediately: false
+    }
 });
 // or
 request.get('http://some.server.com/', {
-  'auth': {
-    'bearer': 'bearerToken'
-  }
+    auth: {
+        bearer: 'bearerToken'
+    }
 });
 ```
 
 If passed as an option, `auth` should be a hash containing values:
 
-- `user` || `username`
-- `pass` || `password`
-- `bearer` (optional)
+-   `user` || `username`
+-   `pass` || `password`
+-   `bearer` (optional)
 
 <!--
 - `sendImmediately` (optional)
@@ -177,8 +190,8 @@ var username = 'username',
     password = 'password',
     url = 'http://' + username + ':' + password + '@some.server.com';
 
-request({url: url}, function (error, response, body) {
-   // Do more stuff with 'body' here
+request({ url: url }, function(error, response, body) {
+    // Do more stuff with 'body' here
 });
 ```
 
@@ -209,18 +222,18 @@ custom `User-Agent` header as well as https.
 var request = require('request');
 
 var options = {
-  url: 'https://api.github.com/repos/request/request',
-  headers: {
-    'User-Agent': 'request'
-  }
+    url: 'https://api.github.com/repos/request/request',
+    headers: {
+        'User-Agent': 'request'
+    }
 };
 
 function callback(error, response, body) {
-  if (!error && response.statusCode == 200) {
-    var info = JSON.parse(body);
-    console.log(info.stargazers_count + " Stars");
-    console.log(info.forks_count + " Forks");
-  }
+    if (!error && response.statusCode == 200) {
+        var info = JSON.parse(body);
+        console.log(info.stargazers_count + ' Stars');
+        console.log(info.forks_count + ' Forks');
+    }
 }
 
 request(options, callback);
@@ -235,8 +248,10 @@ request(options, callback);
 `urequest` supports making requests to [UNIX Domain Sockets](https://en.wikipedia.org/wiki/Unix_domain_socket). To make one, use the following URL scheme:
 
 ```js
-/* Pattern */ 'http://unix:SOCKET:PATH'
-/* Example */ request.get('http://unix:/absolute/path/to/unix.socket:/request/path')
+/* Pattern */ 'http://unix:SOCKET:PATH';
+/* Example */ request.get(
+    'http://unix:/absolute/path/to/unix.socket:/request/path'
+);
 ```
 
 Note: The `SOCKET` path is assumed to be absolute to the root of the host file system.
@@ -249,9 +264,9 @@ Note: The `SOCKET` path is assumed to be absolute to the root of the host file s
 
 The first argument can be either a `url` or an `options` object. The only required option is `uri`; all others are optional.
 
-- `uri` || `url` - fully qualified uri or a parsed url object from `url.parse()`
-- `method` - http method (default: `"GET"`)
-- `headers` - http headers (default: `{}`)
+-   `uri` || `url` - fully qualified uri or a parsed url object from `url.parse()`
+-   `method` - http method (default: `"GET"`)
+-   `headers` - http headers (default: `{}`)
 
 <!-- TODO
 - `baseUrl` - fully qualified uri string used as the base url. Most useful with `request.defaults`, for example when you want to do many requests to the same domain. If `baseUrl` is `https://example.com/api/`, then requesting `/end/point?test=true` will fetch `https://example.com/api/end/point?test=true`. When `baseUrl` is given, `uri` must also be a string.
@@ -259,8 +274,8 @@ The first argument can be either a `url` or an `options` object. The only requir
 
 ---
 
-- `body` - entity body for PATCH, POST and PUT requests. Must be a `Buffer`, `String` or `ReadStream`. If `json` is `true`, then `body` must be a JSON-serializable object.
-- `json` - sets `body` to JSON representation of value and adds `Content-type: application/json` header. Additionally, parses the response body as JSON.
+-   `body` - entity body for PATCH, POST and PUT requests. Must be a `Buffer`, `String` or `ReadStream`. If `json` is `true`, then `body` must be a JSON-serializable object.
+-   `json` - sets `body` to JSON representation of value and adds `Content-type: application/json` header. Additionally, parses the response body as JSON.
 
 <!-- TODO
 - `form` - when passed an object or a querystring, this sets `body` to a querystring representation of value, and adds `Content-type: application/x-www-form-urlencoded` header. When passed no options, a `FormData` instance is returned (and is piped to request). See "Forms" section above.
@@ -281,15 +296,15 @@ The first argument can be either a `url` or an `options` object. The only requir
 
 ---
 
-- `followRedirect` - follow HTTP 3xx responses as redirects (default: `true`). This property can also be implemented as function which gets `response` object as a single argument and should return `true` if redirects should continue or `false` otherwise.
-- `followAllRedirects` - follow non-GET HTTP 3xx responses as redirects (default: `false`)
-- `followOriginalHttpMethod` - by default we redirect to HTTP method GET. you can enable this property to redirect to the original HTTP method (default: `false`)
-- `maxRedirects` - the maximum number of redirects to follow (default: `10`)
-- `removeRefererHeader` - removes the referer header when a redirect happens (default: `false`). **Note:** if true, referer header set in the initial request is preserved during redirect chain.
+-   `followRedirect` - follow HTTP 3xx responses as redirects (default: `true`). This property can also be implemented as function which gets `response` object as a single argument and should return `true` if redirects should continue or `false` otherwise.
+-   `followAllRedirects` - follow non-GET HTTP 3xx responses as redirects (default: `false`)
+-   `followOriginalHttpMethod` - by default we redirect to HTTP method GET. you can enable this property to redirect to the original HTTP method (default: `false`)
+-   `maxRedirects` - the maximum number of redirects to follow (default: `10`)
+-   `removeRefererHeader` - removes the referer header when a redirect happens (default: `false`). **Note:** if true, referer header set in the initial request is preserved during redirect chain.
 
 ---
 
-- `encoding` - encoding to be used on `setEncoding` of response data. If `null`, the `body` is returned as a `Buffer`. Anything else **(including the default value of `undefined`)** will be passed as the [encoding](http://nodejs.org/api/buffer.html#buffer_buffer) parameter to `toString()` (meaning this is effectively `utf8` by default). (**Note:** if you expect binary data, you should set `encoding: null`.)
+-   `encoding` - encoding to be used on `setEncoding` of response data. If `null`, the `body` is returned as a `Buffer`. Anything else **(including the default value of `undefined`)** will be passed as the [encoding](http://nodejs.org/api/buffer.html#buffer_buffer) parameter to `toString()` (meaning this is effectively `utf8` by default). (**Note:** if you expect binary data, you should set `encoding: null`.)
 
 <!-- TODO
 - `gzip` - if `true`, add an `Accept-Encoding` header to request compressed content encodings from the server (if not already present) and decode supported content encodings in the response. **Note:** Automatic decoding of the response content is performed on the body data returned through `request` (both through the `request` stream and passed to the callback function) but is not performed on the `response` stream (available from the `response` event) which is the unmodified `http.IncomingMessage` object which may contain compressed data. See example below.
@@ -314,30 +329,31 @@ instead, it **returns a wrapper** that has your default settings applied to it.
 `request.defaults` to add/override defaults that were previously defaulted.
 
 For example:
+
 ```js
 //requests using baseRequest() will set the 'x-token' header
 var baseRequest = request.defaults({
-  headers: {'x-token': 'my-token'}
-})
+    headers: { 'x-token': 'my-token' }
+});
 
 //requests using specialRequest() will include the 'x-token' header set in
 //baseRequest and will also include the 'special' header
 var specialRequest = baseRequest.defaults({
-  headers: {special: 'special value'}
-})
+    headers: { special: 'special value' }
+});
 ```
 
 ### request.METHOD()
 
 These HTTP method convenience functions act just like `request()` but with a default method already set for you:
 
-- *request.get()*: Defaults to `method: "GET"`.
-- *request.post()*: Defaults to `method: "POST"`.
-- *request.put()*: Defaults to `method: "PUT"`.
-- *request.patch()*: Defaults to `method: "PATCH"`.
-- *request.del() / request.delete()*: Defaults to `method: "DELETE"`.
-- *request.head()*: Defaults to `method: "HEAD"`.
-- *request.options()*: Defaults to `method: "OPTIONS"`.
+-   _request.get()_: Defaults to `method: "GET"`.
+-   _request.post()_: Defaults to `method: "POST"`.
+-   _request.put()_: Defaults to `method: "PUT"`.
+-   _request.patch()_: Defaults to `method: "PATCH"`.
+-   _request.del() / request.delete()_: Defaults to `method: "DELETE"`.
+-   _request.head()_: Defaults to `method: "HEAD"`.
+-   _request.options()_: Defaults to `method: "OPTIONS"`.
 
 ---
 

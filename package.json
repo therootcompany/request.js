@@ -1,29 +1,29 @@
 {
-  "name": "@root/request",
-  "version": "1.3.11",
-  "description": "A lightweight, zero-dependency drop-in replacement for request",
-  "main": "index.js",
-  "files": [
-    "lib"
-  ],
-  "directories": {
-    "example": "examples"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://git.rootprojects.org/root/request.js.git"
-  },
-  "keywords": [
-    "request",
-    "lightweight",
-    "alternative",
-    "http",
-    "https",
-    "call"
-  ],
-  "author": "AJ ONeal <solderjs@gmail.com> (https://solderjs.com/)",
-  "license": "(MIT OR Apache-2.0)"
+    "name": "@root/request",
+    "version": "1.3.11",
+    "description": "A lightweight, zero-dependency drop-in replacement for request",
+    "main": "index.js",
+    "files": [
+        "lib"
+    ],
+    "directories": {
+        "example": "examples"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://git.rootprojects.org/root/request.js.git"
+    },
+    "keywords": [
+        "request",
+        "lightweight",
+        "alternative",
+        "http",
+        "https",
+        "call"
+    ],
+    "author": "AJ ONeal <solderjs@gmail.com> (https://solderjs.com/)",
+    "license": "(MIT OR Apache-2.0)"
 }
