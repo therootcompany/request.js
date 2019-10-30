@@ -504,7 +504,7 @@ function setDefaults(defs) {
 
 var _defaults = {
     sendImmediately: true,
-    method: 'GET',
+    //method: 'GET',
     headers: {},
     useQuerystring: false,
     followRedirect: true,
