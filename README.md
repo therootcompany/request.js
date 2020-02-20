@@ -2,7 +2,9 @@
 
 > Minimalist HTTP client
 
-A lightweight alternative to (and drop-in replacement for) request.
+A lightweight alternative to (and 80/20 drop-in replacement for) request.
+
+Has the 20% of features that 80%+ of people need, in about 500 LoC.
 
 Written from scratch, with zero-dependencies.
 
