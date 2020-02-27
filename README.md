@@ -28,9 +28,7 @@ request('http://www.google.com', function(error, response, body) {
 **Using Promises**
 
 ```js
-var promisify = require('util').promisify;
 var request = require('@root/request');
-request = promisify(request);
 
 request('http://www.google.com')
     .then(function(response) {
