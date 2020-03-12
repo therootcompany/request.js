@@ -1,6 +1,6 @@
 {
     "name": "@root/request",
-    "version": "1.4.2",
+    "version": "1.5.0",
     "description": "A lightweight, zero-dependency drop-in replacement for request",
     "main": "index.js",
     "files": [
