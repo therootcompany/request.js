@@ -240,8 +240,13 @@ function setDefaults(defs) {
         if (_body) {
             // Most APIs expect (or require) Content-Length except in the case of multipart uploads
             // Transfer-Encoding: Chunked (the default) is generally only well-supported downstream
-            finalOpts.headers['Content-Length'] =
-                _body.byteLength || _body.length;
+            if (
+                'undefined' !== typeof _body.byteLength ||
+                'undefined' !== typeof _body.length
+            ) {
+                finalOpts.headers['Content-Length'] =
+                    _body.byteLength || _body.length;
+            }
         }
         if (opts.auth) {
             // if opts.uri specifies auth it will be parsed by url.parse and passed directly to the http module
@@ -359,10 +364,13 @@ function setDefaults(defs) {
         if (_body) {
             debug("\n[urequest] '" + finalOpts.method + "' (request) body");
             debug(_body);
-            // used for chunked encoding
-            //req.write(_body);
-            // used for known content-length
-            req.end(_body);
+            if ('function' === typeof _body.pipe) {
+                // used for chunked encoding
+                _body.pipe(req);
+            } else {
+                // used for known content-length
+                req.end(_body);
+            }
         } else {
             req.end();
         }
