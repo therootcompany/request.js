@@ -264,9 +264,10 @@ function setDefaults(defs) {
                     '[Warn] setting `sendImmediately: false` is not yet supported. Please open an issue if this is an important feature that you need.'
                 );
             }
-            if (opts.bearer) {
+            // [request-compat]
+            if (opts.auth.bearer) {
                 // having a shortcut for base64 encoding makes sense, but this? Eh, whatevs...
-                finalOpts.header.Authorization = 'Bearer: ' + opts.bearer;
+                finalOpts.header.Authorization = 'Bearer ' + opts.auth.bearer;
             }
         }
         if (opts.formData) {
