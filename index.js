@@ -380,7 +380,13 @@ function setDefaults(defs) {
             if ('function' === typeof _body.pipe) {
                 // used for chunked encoding
                 _body.pipe(req);
-                _body.on('error', cb);
+                _body.on('error', function(err) {
+                    // https://nodejs.org/api/stream.html#stream_readable_pipe_destination_options
+                    // if the Readable stream emits an error during processing,
+                    // the Writable destination is not closed automatically
+                    _body.destroy();
+                    req.destroy(err);
+                });
             } else {
                 // used for known content-length
                 req.end(_body);
