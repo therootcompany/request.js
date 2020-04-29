@@ -582,8 +582,8 @@ module.exports._keys = Object.keys(_defaults).concat([
     'form',
     'auth',
     'formData',
-    'FormData'
-    //'userAgent'
+    'FormData',
+    'userAgent' // non-standard for request.js
 ]);
 module.exports.debug =
     -1 !== (process.env.NODE_DEBUG || '').split(/\s+/g).indexOf('urequest');
