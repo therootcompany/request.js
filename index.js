@@ -3,6 +3,8 @@
 var http = require('http');
 var https = require('https');
 var url = require('url');
+var os = require('os');
+var pkg = require('./package.json');
 
 function debug() {
     if (module.exports.debug) {
@@ -237,6 +239,16 @@ function setDefaults(defs) {
 
         finalOpts.method = opts.method;
         finalOpts.headers = JSON.parse(JSON.stringify(opts.headers));
+
+        var uaHeader = getHeaderName(finalOpts, 'User-Agent') || 'User-Agent';
+        // set a default user-agent
+        if (!finalOpts.headers[uaHeader]) {
+            if (false === finalOpts.headers[uaHeader]) {
+                delete finalOpts.headers[uaHeader];
+            } else {
+                finalOpts.headers[uaHeader] = getUserAgent(opts.userAgent);
+            }
+        }
         if (_body) {
             // Most APIs expect (or require) Content-Length except in the case of multipart uploads
             // Transfer-Encoding: Chunked (the default) is generally only well-supported downstream
@@ -368,6 +380,7 @@ function setDefaults(defs) {
             if ('function' === typeof _body.pipe) {
                 // used for chunked encoding
                 _body.pipe(req);
+                _body.on('error', cb);
             } else {
                 // used for known content-length
                 req.end(_body);
@@ -511,6 +524,34 @@ function setDefaults(defs) {
     return smartUrequest;
 }
 
+var nodeUa =
+    '@root+request/' +
+    pkg.version +
+    ' ' +
+    process.release.name +
+    '/' +
+    process.version +
+    ' ' +
+    os.platform() +
+    '/' +
+    os.release() +
+    ' ' +
+    os.type() +
+    '/' +
+    process.arch;
+function getUserAgent(additional) {
+    // See https://tools.ietf.org/html/rfc8555#section-6.1
+    // And https://tools.ietf.org/html/rfc7231#section-5.5.3
+    // And https://community.letsencrypt.org/t/user-agent-flag-explained/3843/2
+
+    var ua = nodeUa;
+    if (additional) {
+        ua = additional + ' ' + ua;
+    }
+
+    return ua;
+}
+
 var _defaults = {
     sendImmediately: true,
     method: '',
@@ -536,6 +577,7 @@ module.exports._keys = Object.keys(_defaults).concat([
     'auth',
     'formData',
     'FormData'
+    //'userAgent'
 ]);
 module.exports.debug =
     -1 !== (process.env.NODE_DEBUG || '').split(/\s+/g).indexOf('urequest');
