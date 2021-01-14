@@ -5,6 +5,7 @@ var https = require('https');
 var url = require('url');
 var os = require('os');
 var pkg = require('./package.json');
+var fs = require('fs'); // only for streams
 
 function debug() {
     if (module.exports.debug) {
@@ -140,6 +141,68 @@ function setDefaults(defs) {
                     return urequestHelper(opts, cb);
                 }
             }
+
+            if (opts.stream) {
+                // make the response await-able
+                var resolve;
+                var reject;
+                resp.stream = new Promise(function (_resolve, _reject) {
+                    resolve = _resolve;
+                    reject = _reject;
+                });
+
+                // allow specifying a file
+                if ('string' === typeof opts.stream) {
+                    try {
+                        if (opts.debug) {
+                            console.debug(
+                                '[@root/request] file write stream created'
+                            );
+                        }
+                        opts.stream = fs.createWriteStream(opts.stream);
+                    } catch (e) {
+                        cb(e);
+                    }
+                }
+                // or an existing write stream
+                if ('function' === typeof opts.stream.pipe) {
+                    if (opts.debug) {
+                        console.debug('[@root/request] stream piped');
+                    }
+                    resp.pipe(opts.stream);
+                }
+                resp.on('error', function (e) {
+                    if (opts.debug) {
+                        console.debug("[@root/request] stream 'error'");
+                        console.error(e.stack);
+                    }
+                    resp.destroy();
+                    if ('function' === opts.stream.destroy) {
+                        opts.stream.destroy(e);
+                    }
+                    reject(e);
+                });
+                resp.on('end', function () {
+                    if (opts.debug) {
+                        console.debug("[@root/request] stream 'end'");
+                    }
+                    if ('function' === opts.stream.destroy) {
+                        opts.stream.end();
+                        // this will close the stream (i.e. sync to disk)
+                        opts.stream.destroy();
+                    }
+                });
+                resp.on('close', function () {
+                    if (opts.debug) {
+                        console.debug("[@root/request] stream 'close'");
+                    }
+                    resolve();
+                });
+                // and in all cases, return the stream
+                cb(null, resp);
+                return;
+            }
+
             if (null === opts.encoding) {
                 resp._body = [];
             } else {
@@ -174,7 +237,9 @@ function setDefaults(defs) {
                 }
 
                 debug('\n[urequest] resp.toJSON():');
-                debug(resp.toJSON());
+                if (module.exports.debug) {
+                    debug(resp.toJSON());
+                }
                 if (opts.debug) {
                     console.debug('[@root/request] Response Body:');
                     console.debug(resp.body);
@@ -568,7 +633,8 @@ var _defaults = {
     followOriginalHttpMethod: false,
     maxRedirects: 10,
     removeRefererHeader: false,
-    //, encoding: undefined
+    // encoding: undefined,
+    // stream: false, // TODO allow a stream?
     gzip: false
     //, body: undefined
     //, json: undefined
@@ -577,6 +643,7 @@ module.exports = setDefaults(_defaults);
 
 module.exports._keys = Object.keys(_defaults).concat([
     'encoding',
+    'stream',
     'body',
     'json',
     'form',

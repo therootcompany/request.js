@@ -14,6 +14,8 @@ Written from scratch, with zero-dependencies.
 
 ```bash
 npm install --save @root/request
+
+# or npm install git+ssh://git@git.therootcompany.com/request.js
 ```
 
 ```js
@@ -38,6 +40,54 @@ request('http://www.google.com')
     .catch(function (error) {
         console.log('error:', error); // Print the error if one occurred
     });
+```
+
+**Streaming**
+
+In order to keep this library lightweight, performant, and keep the code easy to
+read, the streaming behavior is **_slightly different_** from that of
+`request.js`.
+
+```js
+var request = require('@root/request');
+
+var resp = await request({
+    url: 'http://www.google.com',
+    stream: true
+});
+
+resp.on('data', function () {
+    // got some data
+});
+
+resp.on('end', function () {
+    // the data has ended
+});
+
+// resp.stream is a Promise that is resolved when the read stream is destroyed
+await resp.stream;
+console.log('Done');
+```
+
+The difference is that we don't add an extra layer of stream abstraction.
+You must use the response from await, a Promise, or the callback.
+
+You can also give a file path:
+
+```js
+request({
+    url: 'http://www.google.com',
+    stream: '/tmp/google-index.html'
+});
+```
+
+Which is equivalent to passing a write stream for the file:
+
+```js
+request({
+    url: 'http://www.google.com',
+    stream: fs.createWriteStream('/tmp/google-index.html')
+});
 ```
 
 ## Table of contents
