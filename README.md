@@ -18,7 +18,7 @@ npm install --save @root/request
 
 ```js
 var request = require('@root/request');
-request('http://www.google.com', function(error, response, body) {
+request('http://www.google.com', function (error, response, body) {
     console.log('error:', error); // Print the error if one occurred
     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
     console.log('body:', body); // Print the HTML for the Google homepage.
@@ -31,11 +31,11 @@ request('http://www.google.com', function(error, response, body) {
 var request = require('@root/request');
 
 request('http://www.google.com')
-    .then(function(response) {
+    .then(function (response) {
         console.log('statusCode:', response.statusCode); // Print the response status code if a response was received
         console.log('body:', response.body); // Print the HTML for the Google homepage.
     })
-    .catch(function(error) {
+    .catch(function (error) {
         console.log('error:', error); // Print the error if one occurred
     });
 ```
@@ -63,7 +63,7 @@ request.post('http://service.com/upload', { form: { key: 'value' } });
 // or
 request.post(
     { url: 'http://service.com/upload', form: { key: 'value' } },
-    function(err, httpResponse, body) {
+    function (err, httpResponse, body) {
         /* ... */
     }
 );
@@ -190,7 +190,7 @@ var username = 'username',
     password = 'password',
     url = 'http://' + username + ':' + password + '@some.server.com';
 
-request({ url: url }, function(error, response, body) {
+request({ url: url }, function (error, response, body) {
     // Do more stuff with 'body' here
 });
 ```

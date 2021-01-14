@@ -7,9 +7,9 @@ request({
     //headers: { 'user-agent': 'test/1.0' } // overwrite
     //userAgent: 'test/1.1' // add to the default
 })
-    .then(function(resp) {
+    .then(function (resp) {
         console.log(resp.body);
     })
-    .catch(function(err) {
+    .catch(function (err) {
         console.error(err);
     });

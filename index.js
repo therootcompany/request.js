@@ -13,7 +13,7 @@ function debug() {
 }
 
 function mergeOrDelete(defaults, updates) {
-    Object.keys(defaults).forEach(function(key) {
+    Object.keys(defaults).forEach(function (key) {
         if (!(key in updates)) {
             updates[key] = defaults[key];
             return;
@@ -37,7 +37,7 @@ function mergeOrDelete(defaults, updates) {
 // retrieves an existing header, case-sensitive
 function getHeaderName(reqOpts, header) {
     var headerNames = {};
-    Object.keys(reqOpts.headers).forEach(function(casedName) {
+    Object.keys(reqOpts.headers).forEach(function (casedName) {
         headerNames[casedName.toLowerCase()] = casedName;
     });
     // returns the key, which in erroneous cases could be an empty string
@@ -49,11 +49,11 @@ function hasHeader(reqOpts, header) {
 }
 
 function toJSONifier(keys) {
-    return function() {
+    return function () {
         var obj = {};
         var me = this;
 
-        keys.forEach(function(key) {
+        keys.forEach(function (key) {
             if (me[key] && 'function' === typeof me[key].toJSON) {
                 obj[key] = me[key].toJSON();
             } else {
@@ -78,7 +78,7 @@ function setDefaults(defs) {
         function onResponse(resp) {
             var followRedirect;
 
-            Object.keys(defs).forEach(function(key) {
+            Object.keys(defs).forEach(function (key) {
                 if (key in opts && 'undefined' !== typeof opts[key]) {
                     return;
                 }
@@ -146,7 +146,7 @@ function setDefaults(defs) {
                 resp.body = '';
             }
             resp._bodyLength = 0;
-            resp.on('data', function(chunk) {
+            resp.on('data', function (chunk) {
                 if ('string' === typeof resp.body) {
                     resp.body += chunk.toString(opts.encoding);
                 } else {
@@ -154,7 +154,7 @@ function setDefaults(defs) {
                     resp._bodyLength += chunk.length;
                 }
             });
-            resp.on('end', function() {
+            resp.on('end', function () {
                 if ('string' !== typeof resp.body) {
                     if (1 === resp._body.length) {
                         resp.body = resp._body[0];
@@ -199,12 +199,12 @@ function setDefaults(defs) {
             _body = JSON.stringify(opts.json);
         } else if (opts.form) {
             _body = Object.keys(opts.form)
-                .filter(function(key) {
+                .filter(function (key) {
                     if ('undefined' !== typeof opts.form[key]) {
                         return true;
                     }
                 })
-                .map(function(key) {
+                .map(function (key) {
                     return (
                         encodeURIComponent(key) +
                         '=' +
@@ -218,7 +218,7 @@ function setDefaults(defs) {
             _body = Buffer.from(_body);
         }
 
-        Object.keys(opts.uri).forEach(function(key) {
+        Object.keys(opts.uri).forEach(function (key) {
             finalOpts[key] = opts.uri[key];
         });
 
@@ -233,7 +233,7 @@ function setDefaults(defs) {
             'createConnection',
             'timeout',
             'setHost'
-        ].forEach(function(key) {
+        ].forEach(function (key) {
             finalOpts[key] = opts.uri[key];
         });
 
@@ -299,7 +299,7 @@ function setDefaults(defs) {
             }
             try {
                 form = new MyFormData();
-                Object.keys(opts.formData).forEach(function(key) {
+                Object.keys(opts.formData).forEach(function (key) {
                     function add(key, data, opts) {
                         if (data.value) {
                             opts = data.options;
@@ -308,7 +308,7 @@ function setDefaults(defs) {
                         form.append(key, data, opts);
                     }
                     if (Array.isArray(opts.formData[key])) {
-                        opts.formData[key].forEach(function(data) {
+                        opts.formData[key].forEach(function (data) {
                             add(key, data);
                         });
                     } else {
@@ -320,7 +320,7 @@ function setDefaults(defs) {
                 return;
             }
             formHeaders = form.getHeaders();
-            Object.keys(formHeaders).forEach(function(header) {
+            Object.keys(formHeaders).forEach(function (header) {
                 finalOpts.headers[header] = formHeaders[header];
             });
         }
@@ -346,7 +346,7 @@ function setDefaults(defs) {
             debug(formHeaders);
             // generally uploads don't use Chunked Encoding (some systems have issues with it)
             // and I don't want to do the work to calculate the content-lengths. This seems to work.
-            req = form.submit(finalOpts, function(err, resp) {
+            req = form.submit(finalOpts, function (err, resp) {
                 if (err) {
                     cb(err);
                     return;
@@ -380,7 +380,7 @@ function setDefaults(defs) {
             if ('function' === typeof _body.pipe) {
                 // used for chunked encoding
                 _body.pipe(req);
-                _body.on('error', function(err) {
+                _body.on('error', function (err) {
                     // https://nodejs.org/api/stream.html#stream_readable_pipe_destination_options
                     // if the Readable stream emits an error during processing,
                     // the Writable destination is not closed automatically
@@ -427,7 +427,7 @@ function setDefaults(defs) {
             opts = { url: opts };
         }
 
-        module.exports._keys.forEach(function(key) {
+        module.exports._keys.forEach(function (key) {
             if (key in opts && 'undefined' !== typeof opts[key]) {
                 reqOpts[key] = opts[key];
             } else if (key in defs) {
@@ -489,14 +489,14 @@ function setDefaults(defs) {
     }
 
     function smartPromisify(fn) {
-        return function(opts) {
+        return function (opts) {
             var cb;
             if ('function' === typeof arguments[1]) {
                 cb = Array.prototype.slice.call(arguments)[1];
                 return fn(opts, cb);
             }
-            return new Promise(function(resolve, reject) {
-                fn(opts, function(err, resp) {
+            return new Promise(function (resolve, reject) {
+                fn(opts, function (err, resp) {
                     if (err) {
                         err._response = resp;
                         reject(err);
@@ -510,13 +510,13 @@ function setDefaults(defs) {
 
     var smartUrequest = smartPromisify(urequest);
 
-    smartUrequest.defaults = function(_defs) {
+    smartUrequest.defaults = function (_defs) {
         _defs = mergeOrDelete(defs, _defs);
         return setDefaults(_defs);
     };
     ['get', 'put', 'post', 'patch', 'delete', 'head', 'options'].forEach(
-        function(method) {
-            smartUrequest[method] = smartPromisify(function(obj, cb) {
+        function (method) {
+            smartUrequest[method] = smartPromisify(function (obj, cb) {
                 if ('string' === typeof obj) {
                     obj = { url: obj };
                 }

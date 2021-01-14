@@ -14,7 +14,7 @@ request(
         headers: { 'X-Foo': 'Bar' },
         form: { foo: 'bar', baz: 'qux' }
     },
-    function(error, response, body) {
+    function (error, response, body) {
         if (error) {
             console.log('error:', error); // Print the error if one occurred
             return;
