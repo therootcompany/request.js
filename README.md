@@ -48,14 +48,29 @@ In order to keep this library lightweight, performant, and keep the code easy to
 read, the streaming behavior is **_slightly different_** from that of
 `request.js`.
 
+```diff
+-var request = require('request');
++var request = require('@root/request');
+ 
+-var stream = request({ url, headers });
++var stream = await request({ url, headers });
+
+ let attachment = await new MailgunAPI.Attachment({
+   data: stream
+ })
+```
+
+Example:
+
 ```js
 var request = require('@root/request');
 
 var resp = await request({
     url: 'http://www.google.com',
-    stream: true
+    stream: true // true | 'filename.ext' | stream.Writable
 });
 
+// 'resp' itself is a ReadableStream
 resp.on('data', function () {
     // got some data
 });
@@ -64,8 +79,8 @@ resp.on('end', function () {
     // the data has ended
 });
 
-// resp.stream is a Promise that is resolved when the read stream is destroyed
-await resp.stream;
+// 'resp.stream' is a Promise that is resolved when the read stream is destroyed
+await resp.stream; // returns `undefined`
 console.log('Done');
 ```
 
