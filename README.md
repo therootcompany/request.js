@@ -141,12 +141,12 @@ request.post('http://service.com/upload').form({key:'value'})
 
 #### multipart/form-data (Multipart Form Uploads)
 
-For `multipart/form-data` we use the [form-data](https://github.com/form-data/form-data) library by [@felixge](https://github.com/felixge). For the most cases, you can pass your upload form data via the `formData` option.
+For `multipart/form-data` we use the [form-data](https://github.com/form-data/form-data/tree/v2.5.1) library by [@felixge](https://github.com/felixge). For the most cases, you can pass your upload form data via the `formData` option.
 
 To use `form-data`, you must install it separately:
 
 ```bash
-npm install --save form-data@2
+npm install --save form-data@2.x
 ```
 
 ```js
