@@ -1,4 +1,4 @@
-# [µRequest](https://git.rootprojects.org/root/request.js) | a [Root](https://rootprojects.org) project
+# [@root/request](https://git.rootprojects.org/root/request.js) | a [Root](https://rootprojects.org) project
 
 > Minimalist HTTP client
 
@@ -10,7 +10,7 @@ Written from scratch, with zero-dependencies.
 
 ## Super simple to use
 
-µRequest is designed to be a drop-in replacement for request. It supports HTTPS and follows redirects by default.
+@root/request is designed to be a drop-in replacement for request. It also supports Promises and async/await by default.
 
 ```bash
 npm install --save @root/request
