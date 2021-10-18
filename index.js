@@ -76,6 +76,19 @@ function setDefaults(defs) {
         var req;
         var finalOpts = {};
 
+        // allow specifying a file
+        if ('string' === typeof opts.stream) {
+            if (opts.debug) {
+                console.debug('[@root/request] creating file write stream');
+            }
+            try {
+                opts.stream = fs.createWriteStream(opts.stream);
+            } catch (e) {
+                cb(e);
+                return;
+            }
+        }
+
         function onResponse(resp) {
             var followRedirect;
 
@@ -151,20 +164,6 @@ function setDefaults(defs) {
                     reject = _reject;
                 });
 
-                // allow specifying a file
-                if ('string' === typeof opts.stream) {
-                    try {
-                        if (opts.debug) {
-                            console.debug(
-                                '[@root/request] file write stream created'
-                            );
-                        }
-                        opts.stream = fs.createWriteStream(opts.stream);
-                    } catch (e) {
-                        cb(e);
-                        return;
-                    }
-                }
                 // or an existing write stream
                 if ('function' === typeof opts.stream.pipe) {
                     if (opts.debug) {
