@@ -10,7 +10,7 @@ Written from scratch, with zero-dependencies.
 
 ## Super simple to use
 
-@root/request is designed to be a drop-in replacement for request. It also supports Promises and async/await by default.
+@root/request is designed to be a drop-in replacement for request. It also supports Promises and async/await by default, enhanced stream support, and a few other things as mentioned below.
 
 ```bash
 npm install --save @root/request
@@ -51,7 +51,7 @@ read, the streaming behavior is **_slightly different_** from that of
 ```diff
 -var request = require('request');
 +var request = require('@root/request');
- 
+
 -var stream = request({ url, headers });
 +var stream = await request({ url, headers });
 
@@ -105,17 +105,42 @@ request({
 });
 ```
 
+Also, `await resp.stream.body()` can be used to get back the full body (the same as if you didn't use the `stream` option:
+
+```js
+let resp = await request({
+    url: 'http://www.google.com',
+    stream: true
+});
+if (!resp.ok) {
+    await resp.stream.body();
+    console.error(resp.body);
+}
+```
+
 ## Table of contents
 
+-   [Extra Features](/EXTRA.md)
 -   [Forms](#forms)
 -   [HTTP Authentication](#http-authentication)
 -   [Custom HTTP Headers](#custom-http-headers)
 -   [Unix Domain Sockets](#unix-domain-sockets)
 -   [**All Available Options**](#requestoptions-callback)
 
+## Extra Features
+
+The following are features that the original `request` did not have, but have been added for convenience in `@root/request`.
+
+-   Support for `async`/`await` & `Promise`s (as explained above)
+-   `request({ userAgent: 'my-api/1.1' })` (for building API clients)
+-   `resp.ok` (just like `fetch`)
+-   `resp.stream` (see above)
+
+See [EXTRA.md](/EXTRA.md)
+
 ## Forms
 
-`urequest` supports `application/x-www-form-urlencoded` and `multipart/form-data` form uploads.
+`@root/request` supports `application/x-www-form-urlencoded` and `multipart/form-data` form uploads.
 
 <!-- For `multipart/related` refer to the `multipart` API. -->
 
@@ -310,7 +335,7 @@ request(options, callback);
 
 ## UNIX Domain Sockets
 
-`urequest` supports making requests to [UNIX Domain Sockets](https://en.wikipedia.org/wiki/Unix_domain_socket). To make one, use the following URL scheme:
+`@root/request` supports making requests to [UNIX Domain Sockets](https://en.wikipedia.org/wiki/Unix_domain_socket). To make one, use the following URL scheme:
 
 ```js
 /* Pattern */ 'http://unix:SOCKET:PATH';
@@ -426,7 +451,7 @@ These HTTP method convenience functions act just like `request()` but with a def
 
 There are at least <!--three--> two ways to debug the operation of `request`:
 
-1. Launch the node process like `NODE_DEBUG=urequest node script.js`
+1. Launch the node process like `NODE_DEBUG=@root/request node script.js`
    (`lib,request,otherlib` works too).
 
 2. Set `require('@root/request').debug = true` at any time (this does the same thing

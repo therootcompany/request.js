@@ -66,6 +66,102 @@ function toJSONifier(keys) {
     };
 }
 
+function setupPipe(resp, opts) {
+    // make the response await-able
+    var resolve;
+    var reject;
+    var p = new Promise(function (_resolve, _reject) {
+        resolve = _resolve;
+        reject = _reject;
+    });
+
+    // or an existing write stream
+    if ('function' === typeof opts.stream.pipe) {
+        if (opts.debug) {
+            console.debug('[@root/request] stream piped');
+        }
+        resp.pipe(opts.stream);
+    }
+    resp.once('error', function (e) {
+        if (opts.debug) {
+            console.debug("[@root/request] stream 'error'");
+            console.error(e.stack);
+        }
+        resp.destroy();
+        if ('function' === opts.stream.destroy) {
+            opts.stream.destroy(e);
+        }
+        reject(e);
+    });
+    resp.once('end', function () {
+        if (opts.debug) {
+            console.debug("[@root/request] stream 'end'");
+        }
+        if ('function' === opts.stream.destroy) {
+            opts.stream.end();
+            // this will close the stream (i.e. sync to disk)
+            opts.stream.destroy();
+        }
+    });
+    resp.once('close', function () {
+        if (opts.debug) {
+            console.debug("[@root/request] stream 'close'");
+        }
+        resolve();
+    });
+    return p;
+}
+
+function handleResponse(resp, opts, cb) {
+    // body can be buffer, string, or json
+    if (null === opts.encoding) {
+        resp._body = [];
+    } else {
+        resp.body = '';
+    }
+    resp._bodyLength = 0;
+    resp.on('readable', function () {
+        var chunk;
+        while ((chunk = resp.read())) {
+            if ('string' === typeof resp.body) {
+                resp.body += chunk.toString(opts.encoding);
+            } else {
+                resp._body.push(chunk);
+                resp._bodyLength += chunk.length;
+            }
+        }
+    });
+    resp.once('end', function () {
+        if ('string' !== typeof resp.body) {
+            if (1 === resp._body.length) {
+                resp.body = resp._body[0];
+            } else {
+                resp.body = Buffer.concat(resp._body, resp._bodyLength);
+            }
+            resp._body = null;
+        }
+        if (opts.json && 'string' === typeof resp.body) {
+            // TODO I would parse based on Content-Type
+            // but request.js doesn't do that.
+            try {
+                resp.body = JSON.parse(resp.body);
+            } catch (e) {
+                // ignore
+            }
+        }
+
+        debug('\n[urequest] resp.toJSON():');
+        if (module.exports.debug) {
+            debug(resp.toJSON());
+        }
+        if (opts.debug) {
+            console.debug('[@root/request] Response Body:');
+            console.debug(resp.body);
+        }
+        cb(null, resp, resp.body);
+    });
+}
+
 function setDefaults(defs) {
     defs = defs || {};
 
@@ -100,9 +196,16 @@ function setDefaults(defs) {
             });
             followRedirect = opts.followRedirect;
 
+            // copied from WHATWG fetch
+            resp.ok = false;
+            if (resp.statusCode >= 200 && resp.statusCode < 300) {
+                resp.ok = true;
+            }
+
             resp.toJSON = toJSONifier([
                 'statusCode',
                 'body',
+                'ok',
                 'headers',
                 'request'
             ]);
@@ -156,96 +259,18 @@ function setDefaults(defs) {
             }
 
             if (opts.stream) {
-                // make the response await-able
-                var resolve;
-                var reject;
-                resp.stream = new Promise(function (_resolve, _reject) {
-                    resolve = _resolve;
-                    reject = _reject;
-                });
-
-                // or an existing write stream
-                if ('function' === typeof opts.stream.pipe) {
-                    if (opts.debug) {
-                        console.debug('[@root/request] stream piped');
-                    }
-                    resp.pipe(opts.stream);
-                }
-                resp.on('error', function (e) {
-                    if (opts.debug) {
-                        console.debug("[@root/request] stream 'error'");
-                        console.error(e.stack);
-                    }
-                    resp.destroy();
-                    if ('function' === opts.stream.destroy) {
-                        opts.stream.destroy(e);
-                    }
-                    reject(e);
-                });
-                resp.on('end', function () {
-                    if (opts.debug) {
-                        console.debug("[@root/request] stream 'end'");
-                    }
-                    if ('function' === opts.stream.destroy) {
-                        opts.stream.end();
-                        // this will close the stream (i.e. sync to disk)
-                        opts.stream.destroy();
-                    }
-                });
-                resp.on('close', function () {
-                    if (opts.debug) {
-                        console.debug("[@root/request] stream 'close'");
-                    }
-                    resolve();
-                });
-                // and in all cases, return the stream
+                resp.stream = setupPipe(resp, opts);
+                // can be string, buffer, or json... why not an async function too?
+                resp.stream.body = async function () {
+                    handleResponse(resp, opts, cb);
+                    await resp.stream;
+                    return resp.body;
+                };
                 cb(null, resp);
                 return;
             }
 
-            if (null === opts.encoding) {
-                resp._body = [];
-            } else {
-                resp.body = '';
-            }
-            resp._bodyLength = 0;
-            resp.on('data', function (chunk) {
-                if ('string' === typeof resp.body) {
-                    resp.body += chunk.toString(opts.encoding);
-                } else {
-                    resp._body.push(chunk);
-                    resp._bodyLength += chunk.length;
-                }
-            });
-            resp.on('end', function () {
-                if ('string' !== typeof resp.body) {
-                    if (1 === resp._body.length) {
-                        resp.body = resp._body[0];
-                    } else {
-                        resp.body = Buffer.concat(resp._body, resp._bodyLength);
-                    }
-                    resp._body = null;
-                }
-                if (opts.json && 'string' === typeof resp.body) {
-                    // TODO I would parse based on Content-Type
-                    // but request.js doesn't do that.
-                    try {
-                        resp.body = JSON.parse(resp.body);
-                    } catch (e) {
-                        // ignore
-                    }
-                }
-
-                debug('\n[urequest] resp.toJSON():');
-                if (module.exports.debug) {
-                    debug(resp.toJSON());
-                }
-                if (opts.debug) {
-                    console.debug('[@root/request] Response Body:');
-                    console.debug(resp.body);
-                }
-                cb(null, resp, resp.body);
-            });
+            handleResponse(resp, opts, cb);
         }
 
         var _body;
@@ -437,7 +462,7 @@ function setDefaults(defs) {
             }
         }
         req = requester.request(finalOpts, onResponse);
-        req.on('error', cb);
+        req.once('error', cb);
 
         if (_body) {
             debug("\n[urequest] '" + finalOpts.method + "' (request) body");
@@ -445,7 +470,7 @@ function setDefaults(defs) {
             if ('function' === typeof _body.pipe) {
                 // used for chunked encoding
                 _body.pipe(req);
-                _body.on('error', function (err) {
+                _body.once('error', function (err) {
                     // https://nodejs.org/api/stream.html#stream_readable_pipe_destination_options
                     // if the Readable stream emits an error during processing,
                     // the Writable destination is not closed automatically
