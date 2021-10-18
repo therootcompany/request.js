@@ -162,6 +162,7 @@ function setDefaults(defs) {
                         opts.stream = fs.createWriteStream(opts.stream);
                     } catch (e) {
                         cb(e);
+                        return;
                     }
                 }
                 // or an existing write stream
