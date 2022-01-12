@@ -280,7 +280,7 @@ function setDefaults(defs) {
         var requester;
 
         if (opts.body) {
-            if (true === opts.json) {
+            if (true === opts.json && 'string' !== typeof opts.body) {
                 _body = JSON.stringify(opts.body);
             } else {
                 _body = opts.body;
