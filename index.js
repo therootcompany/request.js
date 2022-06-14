@@ -324,7 +324,9 @@ function setDefaults(defs) {
             'timeout',
             'setHost'
         ].forEach(function (key) {
-            finalOpts[key] = opts.uri[key];
+            if (key in opts) {
+                finalOpts[key] = opts[key];
+            }
         });
 
         finalOpts.method = opts.method;
