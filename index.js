@@ -120,6 +120,9 @@ function handleResponse(resp, opts, cb) {
         resp.body = '';
     }
     resp._bodyLength = 0;
+    resp.once('error', function (err) {
+        cb(err, resp, resp.body);
+    });
     resp.on('readable', function () {
         var chunk;
         while ((chunk = resp.read())) {
