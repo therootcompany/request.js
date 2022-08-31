@@ -3,6 +3,9 @@
     "version": "1.8.3",
     "description": "A lightweight, zero-dependency drop-in replacement for request",
     "main": "index.js",
+    "browser": {
+        "index.js": "browser.js"
+    },
     "files": [
         "lib"
     ],
