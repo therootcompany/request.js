@@ -4,14 +4,18 @@ module.exports._typesOnly = true;
 
 /**
  * @callback Request
- * @param {Object} opts
- * @param {any} [opts.body]
- * @param {Object.<String,any>} [opts.form]
- * @param {Headers} [opts.headers]
- * @param {String} [opts.method]
- * @param {Boolean | any} [opts.json]
- * @param {String} opts.url
+ * @param {RequestOptions} opts
  * @returns {Response}
+ */
+
+/**
+ * @typedef {Object} RequestOptions
+ * @prop {any} [opts.body]
+ * @prop {Object.<String,any>} [opts.form]
+ * @prop {Headers} [opts.headers]
+ * @prop {String} [opts.method]
+ * @prop {Boolean | any} [opts.json]
+ * @prop {String} opts.url
  */
 
 /**
