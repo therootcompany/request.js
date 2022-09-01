@@ -33,6 +33,9 @@ let _optionKeys = Object.keys(_fetchDefaults).concat([
 
 function setDefaults(_defs) {
     return async function request(opts) {
+        if ('string' === typeof opts) {
+            opts = { url: opts };
+        }
         let reqOpts = { headers: {} };
 
         if (
