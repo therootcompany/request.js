@@ -4,7 +4,7 @@
     "description": "A lightweight, zero-dependency drop-in replacement for request",
     "main": "index.js",
     "browser": {
-        "request.js": "browser.js"
+        "./request.js": "./browser.js"
     },
     "files": [
         "browser.js",
