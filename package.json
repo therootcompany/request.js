@@ -8,6 +8,7 @@
     },
     "files": [
         "browser.js",
+        "jsconfig.json",
         "lib",
         "local-types.js",
         "types.js"
