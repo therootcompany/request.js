@@ -7,6 +7,35 @@ var os = require('os');
 var pkg = require('./package.json');
 var fs = require('fs'); // only for streams
 
+var _defaults = {
+    sendImmediately: true,
+    method: '',
+    headers: {},
+    useQuerystring: false,
+    followRedirect: true,
+    followAllRedirects: false,
+    followOriginalHttpMethod: false,
+    maxRedirects: 10,
+    removeRefererHeader: false,
+    // encoding: undefined,
+    // stream: false, // TODO allow a stream?
+    gzip: false
+    //, body: undefined
+    //, json: undefined
+};
+
+var _keys = Object.keys(_defaults).concat([
+    'encoding',
+    'stream',
+    'body',
+    'json',
+    'form',
+    'auth',
+    'formData',
+    'FormData',
+    'userAgent' // non-standard for request.js
+]);
+
 function debug() {
     if (module.exports.debug) {
         console.log.apply(console, arguments);
@@ -165,10 +194,16 @@ function handleResponse(resp, opts, cb) {
     });
 }
 
+/**
+ * @param {any} defs - TODO enumerate defaults
+ * @returns {Request}
+ */
 function setDefaults(defs) {
     defs = defs || {};
 
+    /** @type {Request} */
     function urequestHelper(opts, cb) {
+        //jshint maxcomplexity:42
         debug('\n[urequest] processed options:');
         debug(opts);
 
@@ -522,7 +557,7 @@ function setDefaults(defs) {
             opts = { url: opts };
         }
 
-        module.exports._keys.forEach(function (key) {
+        _keys.forEach(function (key) {
             if (key in opts && 'undefined' !== typeof opts[key]) {
                 reqOpts[key] = opts[key];
             } else if (key in defs) {
@@ -653,35 +688,12 @@ function getUserAgent(additional) {
     return ua;
 }
 
-var _defaults = {
-    sendImmediately: true,
-    method: '',
-    headers: {},
-    useQuerystring: false,
-    followRedirect: true,
-    followAllRedirects: false,
-    followOriginalHttpMethod: false,
-    maxRedirects: 10,
-    removeRefererHeader: false,
-    // encoding: undefined,
-    // stream: false, // TODO allow a stream?
-    gzip: false
-    //, body: undefined
-    //, json: undefined
-};
-module.exports = setDefaults(_defaults);
+exports.request = setDefaults(_defaults);
+exports._keys = _keys;
 
-module.exports._keys = Object.keys(_defaults).concat([
-    'encoding',
-    'stream',
-    'body',
-    'json',
-    'form',
-    'auth',
-    'formData',
-    'FormData',
-    'userAgent' // non-standard for request.js
-]);
+module.exports = exports.request;
+module.exports._keys = _keys;
+
 module.exports.debug =
     -1 !== (process.env.NODE_DEBUG || '').split(/\s+/g).indexOf('urequest');
 

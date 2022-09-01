@@ -1,0 +1,14 @@
+#!/bin/sh
+
+my_typedefs="$(
+    grep typedef ./types.js | cut -d ' ' -f5
+)"
+
+rm -f ./local-types.js
+{
+    echo '/**'
+    for my_type in $my_typedefs; do
+        echo " * @typedef {import('./types.js').${my_type}} ${my_type}"
+    done
+    echo ' */'
+} >> ./local-types.js
