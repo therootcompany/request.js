@@ -4,13 +4,14 @@
     "description": "A lightweight, zero-dependency drop-in replacement for request",
     "main": "index.js",
     "browser": {
-        "index.js": "browser.js"
+        "request.js": "browser.js"
     },
     "files": [
         "browser.js",
         "jsconfig.json",
         "lib",
         "local-types.js",
+        "request.js",
         "types.js"
     ],
     "directories": {
