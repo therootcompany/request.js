@@ -5,11 +5,11 @@ module.exports._typesOnly = true;
 /**
  * @callback Request
  * @param {Object} opts
- * @param {String} [opts.body]
+ * @param {any} [opts.body]
  * @param {Object.<String,any>} [opts.form]
- * @param {Headers} opts.headers
- * @param {Boolean | String} [opts.json]
+ * @param {Headers} [opts.headers]
  * @param {String} [opts.method]
+ * @param {Boolean | any} [opts.json]
  * @param {String} opts.url
  * @returns {Response}
  */
@@ -20,7 +20,7 @@ module.exports._typesOnly = true;
  * @prop {Headers} headers
  * @prop {Boolean} ok
  * @prop {any} [response] - TODO (browser only)
- * @prop {any} request - TODO
+ * @prop {any} [request] - TODO
  * @prop {String} status
  * @prop {Number} statusCode
  */
