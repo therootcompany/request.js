@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * @typedef {import('./').Request} Request
+ * @typedef {import('./').RequestOptions} RequestOptions
+ * @typedef {import('./').Response} Response
+ * @typedef {import('./').Headers} Headers
+ */
+
 // `fetch` will be available for node and browsers as a global
 //var fetch = window.fetch;
 
@@ -31,8 +38,15 @@ let _optionKeys = Object.keys(_fetchDefaults).concat([
     //'userAgent' // not allowed, non-standard for request.js
 ]);
 
+/**
+ * @returns {Request>}
+ */
 function setDefaults(_defs) {
-    return async function request(opts) {
+    /**
+     * @param {RequestOptions} opts
+     * @returns {Promise<Response>}
+     **/
+    async function request(opts) {
         if ('string' === typeof opts) {
             opts = { url: opts };
         }
@@ -150,7 +164,9 @@ function setDefaults(_defs) {
             });
         }
         return result;
-    };
+    }
+
+    return request;
 }
 
 /**
@@ -195,7 +211,13 @@ function unicodeToBase64(utf8) {
 }
 
 let defaultRequest = setDefaults({ mode: 'cors' });
-exports.request = defaultRequest;
-exports.defaults = setDefaults;
-module.exports = defaultRequest;
-module.exports.defaults = setDefaults;
+//@ts-ignore
+exports.urequest = defaultRequest;
+//@ts-ignore
+exports.urequest.defaults = setDefaults;
+
+// for backwards compat
+if ('undefined' !== typeof module) {
+    module.exports = defaultRequest;
+    module.exports.defaults = setDefaults;
+}

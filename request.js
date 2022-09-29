@@ -4,8 +4,16 @@ var http = require('http');
 var https = require('https');
 var url = require('url');
 var os = require('os');
+//@ts-ignore
 var pkg = require('./package.json');
 var fs = require('fs'); // only for streams
+
+/**
+ * @typedef {import('./').Request} Request
+ * @typedef {import('./').RequestOptions} RequestOptions
+ * @typedef {import('./').Response} Response
+ * @typedef {import('./').Headers} Headers
+ */
 
 var _defaults = {
     sendImmediately: true,

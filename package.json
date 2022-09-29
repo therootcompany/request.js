@@ -4,22 +4,19 @@
     "description": "A lightweight, zero-dependency drop-in replacement for request",
     "main": "index.js",
     "browser": {
-        "./request.js": "./browser.js"
+        "./request.js": "./urequest.js"
     },
     "files": [
-        "browser.js",
         "jsconfig.json",
         "lib",
-        "local-types.js",
         "request.js",
-        "types.js"
+        "urequest.js"
     ],
     "directories": {
         "example": "examples"
     },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "prepublish": "./bin/localize-types"
+        "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {
         "type": "git",
