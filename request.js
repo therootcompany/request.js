@@ -668,11 +668,18 @@ function setDefaults(defs) {
     return smartUrequest;
 }
 
+var runtime = process.release?.name || '';
+if (!runtime) {
+    if (process.isBun) {
+        runtime = 'bun';
+    }
+}
+
 var nodeUa =
     '@root+request/' +
     pkg.version +
     ' ' +
-    process.release.name +
+    runtime +
     '/' +
     process.version +
     ' ' +
