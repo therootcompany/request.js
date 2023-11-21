@@ -30,7 +30,7 @@
         "https",
         "call"
     ],
-    "types": "types.d.ts",
+    "typings": "./types.d.ts",
     "author": "AJ ONeal <coolaj86@gmail.com> (https://coolaj86.com/)",
     "license": "(MIT OR Apache-2.0)"
 }
