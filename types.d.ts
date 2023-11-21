@@ -1,4 +1,4 @@
-export = request;
+export = root__request;
 
 import caseless = require("caseless");
 import stream = require("stream");
@@ -10,9 +10,9 @@ import net = require("net");
 import tough = require("tough-cookie");
 import { Url } from "url";
 
-declare function request(opts: any, ...args: any[]): any;
+declare function root__request(opts: any, ...args: any[]): any;
 
-declare namespace request {
+declare namespace root__request {
     interface RequestAPI<TRequest extends Request, TOptions extends CoreOptions, TUriUrlOptions> {
         defaults(options: TOptions): RequestAPI<TRequest, TOptions, RequiredUriUrl>;
         defaults(options: RequiredUriUrl & TOptions): DefaultUriUrlRequestApi<TRequest, TOptions, OptionalUriUrl>;
@@ -392,4 +392,4 @@ declare namespace request {
     }
 }
 
-declare var request: request.RequestAPI<request.Request, request.CoreOptions, request.RequiredUriUrl>;
+declare var request: root__request.RequestAPI<root__request.Request, root__request.CoreOptions, root__request.RequiredUriUrl>;
