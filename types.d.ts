@@ -21,4 +21,26 @@ declare namespace root__request {
 
     function put(opts: any, ...args: any[]): any;
 
+    type Headers = Record<string, string | string[]>;
+
+    interface RequestOptions {
+        body ?: any;
+        form ?: any;
+        headers ?: Headers;
+        method ?: string;
+        json ?: boolean | any;
+        url: string;
+    }
+
+    interface Response {
+        body: any;
+        headers: Headers;
+        ok: boolean;
+        response ?: any;
+        request ?: any;
+        status: string;
+        statusCode: number;
+    }
+
+    function Request(opts: RequestOptions): Response;
 }
