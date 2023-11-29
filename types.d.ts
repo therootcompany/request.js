@@ -1,4 +1,6 @@
-export = root__request;
+// Imported from: https://github.com/soywiz/typescript-node-definitions/d.ts
+
+/// <reference types="node" />
 
 import caseless = require("caseless");
 import stream = require("stream");
@@ -10,9 +12,7 @@ import net = require("net");
 import tough = require("tough-cookie");
 import { Url } from "url";
 
-declare function root__request(opts: any, ...args: any[]): any;
-
-declare namespace root__request {
+declare namespace request {
     interface RequestAPI<TRequest extends Request, TOptions extends CoreOptions, TUriUrlOptions> {
         defaults(options: TOptions): RequestAPI<TRequest, TOptions, RequiredUriUrl>;
         defaults(options: RequiredUriUrl & TOptions): DefaultUriUrlRequestApi<TRequest, TOptions, OptionalUriUrl>;
@@ -391,5 +391,5 @@ declare namespace root__request {
         getCookies(uri: string | Url): Cookie[];
     }
 }
-
-declare var request: root__request.RequestAPI<root__request.Request, root__request.CoreOptions, root__request.RequiredUriUrl>;
+declare var request: request.RequestAPI<request.Request, request.CoreOptions, request.RequiredUriUrl>;
+export = request;
